@@ -57,6 +57,8 @@ function run(configs){
 
 
 async function start() {
+  if((!wssurl) || !(wssurl.toLowerCase().startsWith('wss://'))) return console.log('invalid wssurl');
+  
   await dohnut.start()
   dns.setServers([dnsServer]);
 

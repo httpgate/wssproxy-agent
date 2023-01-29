@@ -1,0 +1,34 @@
+{
+  "name": "wssagent",
+  "version": "1.0.2",
+  "description": "a local proxy server as an agent connecting to remote websocket proxy server",
+  "main": "wssagent.js",
+  "scripts": {
+    "start" : "node ./wssagent.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "bin": {
+    "wssagent": "./wssagent.js"
+  },  
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/httpgate/wssproxy-agent.git"
+  },
+  "keywords": [
+    "proxy",
+    "pacproxy",
+    "websocket",
+    "wss"
+  ],
+  "author": "xinjingjie.us@gmail.com",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/httpgate/wssproxy-agent/issues"
+  },
+  "homepage": "https://github.com/httpgate/wssproxy-agent#readme",
+  "dependencies": {
+    "readline-sync": "^1.4.10",
+    "ws": "^8.12.0",
+    "dohnut": "^4.11.0"
+  }
+}

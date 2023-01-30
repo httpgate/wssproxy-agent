@@ -17,7 +17,7 @@ const dnsServer = '127.0.0.1:51392';
 
 function run(configs){
   if(configs) {
-    wssurl = configs.url;
+    wssurl = configs.wssurl;
     proxyport = configs.proxyport;
     shareproxy = configs.shareproxy;
     dohUrl = configs.dohUrl;    
@@ -57,7 +57,7 @@ function run(configs){
 
 
 async function start() {
-  if((!wssurl) || !(wssurl.toLowerCase().startsWith('wss://'))) return console.log('invalid wssurl');
+  if((!wssurl) || (!wssurl.toLowerCase().startsWith('wss://'))) return console.log('invalid wssurl');
   
   await dohnut.start()
   dns.setServers([dnsServer]);

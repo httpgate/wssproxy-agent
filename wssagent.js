@@ -6,6 +6,7 @@ var wssurl = '';
 var proxyport = 0 ;
 var shareproxy = false;
 var dohUrl = 'https://mozilla.cloudflare-dns.com/dns-query';
+var dohnut = false;
 
 const net = require('net');
 const WebSocket = require('ws');
@@ -14,13 +15,12 @@ const dns = require('dns');
 const { Dohnut } = require('dohnut');
 const dnsServer = '127.0.0.1:51392';
 
-
 function run(configs){
   if(configs) {
     wssurl = configs.wssurl;
-    proxyport = configs.proxyport;
-    shareproxy = configs.shareproxy;
-    dohUrl = configs.dohUrl;    
+    if(proxyport in configs) proxyport = configs.proxyport;
+    if(shareproxy in configs) shareproxy = configs.shareproxy;
+    if(dohUrl in configs) dohUrl = configs.dohUrl;    
   }
   else if(process.argv[2]){
     wssurl = process.argv[2];
@@ -29,7 +29,11 @@ function run(configs){
     
     if(process.argv[4] && (process.argv[4].toLowerCase()=='-s')) shareproxy = true;
 
+    if(process.env.shareproxy) shareproxy = true;
+
     if(process.argv[5] && (process.argv[5].toLowerCase().startsWith('https://'))) dohUrl = process.argv[5];
+
+    if(process.env.dohurl) dohUrl = process.env.dohurl;
 
   } else {
     wssurl = readline.question('\r\nInput websocket wss url:');
@@ -51,7 +55,7 @@ function run(configs){
     bootstrap : '1.1.1.1',
     countermeasures : ''
   }
-  const dohnut = new Dohnut(configuration)
+  dohnut = new Dohnut(configuration)
   start();
 }
 

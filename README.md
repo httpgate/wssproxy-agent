@@ -15,7 +15,7 @@ node ./wssagent.js [wssurl] [proxy-port] [-s] [DOH-Url]
 
 Linux系统下的可执行文件只能在命令行下执行，除了wssurl外其它参数不是必须输入
 
-手机用户参照[Android系统wssagent说明](\/run-in-container\/README_EN\.md)
+手机用户参照[Android系统wssagent说明](\/run-in-container\/README\.md)
 
 # 使用
 

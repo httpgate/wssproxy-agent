@@ -18,9 +18,9 @@ const dnsServer = '127.0.0.1:51392';
 function run(configs){
   if(configs) {
     wssurl = configs.wssurl;
-    if(proxyport in configs) proxyport = configs.proxyport;
-    if(shareproxy in configs) shareproxy = configs.shareproxy;
-    if(dohUrl in configs) dohUrl = configs.dohUrl;    
+    if('proxyport' in configs) proxyport = configs.proxyport;
+    if('shareproxy' in configs) shareproxy = configs.shareproxy;
+    if('dohUrl' in configs) dohUrl = configs.dohUrl;    
   }
   else if(process.argv[2]){
     wssurl = process.argv[2];

@@ -67,6 +67,8 @@ async function start() {
   dns.setServers([dnsServer]);
 
   const server = net.createServer(c => {
+      c.setTimeout(60*1000+500);
+
       const ws = new WebSocket(wssurl)
 
       ws.on('close', () => c.destroy())

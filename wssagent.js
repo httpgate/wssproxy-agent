@@ -7,8 +7,12 @@ var proxyport = 0 ;
 var shareproxy = false;
 var dohUrl = 'https://mozilla.cloudflare-dns.com/dns-query';
 var dohnut = false;
+var server = false;
+var tlsserver = false;
+var istls = false;
 
 const net = require('net');
+const tls = require('tls');
 const WebSocket = require('ws');
 const readline = require('readline-sync');
 const dns = require('dns');
@@ -60,27 +64,53 @@ function run(configs){
 }
 
 
-async function start() {
+function start() {
   if((!wssurl) || (!wssurl.toLowerCase().startsWith('wss://'))) return console.log('invalid wssurl');
-  
+  if(!wssurl.toLowerCase().endsWith('/tls')) return connect();
+
+  istls = true;
+  let vshare = shareproxy;
+  let vport = proxyport;
+  shareproxy = false;
+  proxyport = 0;
+  connect();
+
+  tlsserver = net.createServer(function(socket) {
+    socket.setTimeout(60*1000+800);
+    let upstream = tls.connect(server.address().port, '127.0.0.1', {rejectUnauthorized: false});
+    socket.on('end', () => upstream.destroy());
+    socket.on('error', () => upstream.destroy());
+    upstream.on('end', () => socket.destroy());
+    upstream.on('error', () => socket.destroy());
+    socket.pipe(upstream).pipe(socket);
+  });
+
+  tlsserver.on('error', (err) => {
+    console.log('\r\n tls server error '+ err);
+  })
+
+  if(vshare){
+    tlsserver.listen(vport, ()=>console.log('\r\nwssagent tls serve in port : ' + tlsserver.address().port));
+  } else {
+    tlsserver.listen(vport, '127.0.0.1', ()=>console.log('\r\nwssagent tls serve in port : ' + tlsserver.address().port));
+  }
+
+}
+
+async function connect() {  
   await dohnut.start()
   dns.setServers([dnsServer]);
 
-  const server = net.createServer(c => {
+  server = net.createServer(c => {
       c.setTimeout(60*1000+500);
 
       const ws = new WebSocket(wssurl)
-
       ws.on('close', () => c.destroy())
-
       ws.on('error', () => c.destroy())
-
       c.on('end', () => ws.close(1000))
-
       c.on('error', () => ws.close(1000))
 
       ws.on('open', () => c.on('data', data => ws.send(data)))
-
       ws.on('message', data => {
         if (!c.destroyed)
           c.write(data)
@@ -88,13 +118,16 @@ async function start() {
   })
 
   server.on('error', (err) => {
-    console.log('error');
+    console.log('\r\n server error '+ err);
   })
 
+  let cb = {};
+  if(!istls) cb = ()=>console.log('\r\nwssagent serve in port : ' + server.address().port);
+
   if(shareproxy){
-    server.listen(proxyport, ()=>console.log('\r\nwssagent serve in port : ' + server.address().port));
+    server.listen(proxyport, cb);
   } else {
-    server.listen(proxyport, '127.0.0.1', ()=>console.log('\r\nwssagent serve in port : ' + server.address().port));
+    server.listen(proxyport, '127.0.0.1', cb);
   }
 }
 

@@ -6,6 +6,15 @@ A local proxy agent connecting to remote websocet proxy server
 采用DOH(DNS over https)保护用户隐私
 
 
+# 使用
+
+需要先运行[pacproxy服务](https://github.com/httpgate/pacproxy.js) ， 运行后屏幕会显示 wssurl
+
+运行wssagent, 输入wssurl
+
+浏览器或者wifi设置代理服务器为 localhost , 代理端口为wssagent显示的端口, 就可以加密翻墙
+
+
 # 运行
 
 可下载直接点击[绿色可执行文件](https://github.com/httpgate/resouces/tree/main/wssproxy-agent)，或加上可选命令行参数。默认只本机能用代理，加-s可分享本机IP和端口给同一网段：
@@ -17,15 +26,6 @@ node ./wssagent.js [wssurl] [proxy-port] [-s] [DOH-Url]
 Linux系统下的可执行文件只能在命令行下执行，除了wssurl外其它参数不是必须输入
 
 手机用户参照[Android系统wssagent说明](\/run-in-container\/README\.md)
-
-
-# 使用
-
-获得wssurl, 和"pac url"的区别是把 https 改成 wss 
-
-运行wssagent
-
-浏览器设置代理服务器为 localhost , 代理端口为wssagent显示的端口
 
 
 # 用途

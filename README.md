@@ -33,3 +33,9 @@ Linux系统下的可执行文件只能在命令行下执行，除了wssurl外其
 如果海外的pacproxy服务器被封了，这有可能是IP被封了，或者域名被封了。这时你可以自己[注册一个域名](https://github.com/httpgate/pacproxy.js/blob/main/documents/About_Domain_ZH.md)，在cloudflare之类的支持websocket的CDN上注册一个账户， 再在CDN上把这个域名指向你远端的pacproxy服务器，这时就又可以上网了。
 
 这时域名变成了你注册的域名，但域名后面的url还是原来的pacproxy的url, 就可以连上了。enjoy and, 法轮大法好，真善忍好。
+
+# 安全
+
+* 如果不信任中转流量的CDN, 则可以在CDN的 wss url 后面加 /tls , 此时穿越CDN的流量会加密，CDN不能探测你所访问的网站和内容，即使访问不加密的http网站对CDN也是不可知的
+
+* 如果不信任pacproxy所运行的服务器， 则可以和无界，自由门混合使用。将无界，自由门的代理端口设置为wssagent的端口，这样pacproxy并不知道你具体访问了哪些网站

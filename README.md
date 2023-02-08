@@ -32,9 +32,7 @@ Linux系统下的可执行文件只能在命令行下执行，除了wssurl外其
 
 * 很多软件不支持https加密的pac代理， 用wssagent就可以在一台电脑上把加密代理变成普通代理，整个局域网都可以按普通方式代理上网
 
-* 如果海外的pacproxy服务器被封了，这有可能是IP被封了，或者域名被封了。这时你可以自己[注册一个域名](https://github.com/httpgate/pacproxy.js/blob/main/documents/About_Domain_ZH.md)，在cloudflare之类的支持websocket的CDN上注册一个账户， 再在CDN上把这个域名指向你远端的pacproxy服务器，这时就又可以上网了。
-
-这时域名变成了你注册的域名，但域名后面的url还是原来的pacproxy的url, 就可以连上了。enjoy and, 法轮大法好，真善忍好。
+* 如果海外的pacproxy服务器被封了，这有可能是IP被封了，或者域名被封了。这时你可以自己[注册一个域名](https://github.com/httpgate/pacproxy.js/blob/main/documents/About_Domain_ZH.md)，在cloudflare之类的支持websocket的CDN上注册一个账户， 再在CDN上把这个域名指向你远端的pacproxy服务器，然后把wssurl中的域名改成你注册的域名, 就又可以连上了。enjoy and, 法轮大法好，真善忍好。
 
 
 # 安全

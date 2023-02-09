@@ -1,5 +1,5 @@
 # wssproxy-agent
-A local proxy agent connecting to remote websocet proxy server
+A local proxy agent connecting to remote websocket proxy server
 
 把远端的websocket加密代理服务器映射为本地的非加密普通代理服务器
 

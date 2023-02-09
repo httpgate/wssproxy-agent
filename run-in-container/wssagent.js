@@ -11,6 +11,6 @@ var configs =
     //DNS over HTTPS 的服务url，可以替换成其他的
         dohUrl : 'https://mozilla.cloudflare-dns.com/dns-query'
 } ;
-    
+
 
 require('../wssagent.js').run(configs);

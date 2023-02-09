@@ -17,7 +17,11 @@ const WebSocket = require('ws');
 const readline = require('readline-sync');
 const dns = require('dns');
 const { Dohnut } = require('dohnut');
-const dnsServer = '127.0.0.1:51392';
+const dnsServer = '127.0.0.1:' + getRandomInt(42099,51392);
+
+function getRandomInt(min, max) {
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+}
 
 function run(configs){
   if(configs) {

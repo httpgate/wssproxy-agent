@@ -14,6 +14,8 @@ A local proxy agent connecting to remote websocket proxy server
 
 浏览器或者wifi设置代理服务器为 localhost , 代理端口为wssagent显示的端口, 就可以加密翻墙
 
+也可以使用local pac url来限制只一个浏览器翻墙，如只firefox翻墙可设置pac url: http://localhost:[proxyport]/pac/firefox
+
 
 # 运行
 

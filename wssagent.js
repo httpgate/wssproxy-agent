@@ -64,7 +64,7 @@ function run(configs){
     if(inshare && (inshare.toLowerCase().startsWith('y'))) shareproxy = true;
 
     let inip = readline.question('\r\ninput wss server ip address:');
-    if(inip)  wssip = indoh;
+    if(inip)  wssip = inip;
   }
   start();
 }

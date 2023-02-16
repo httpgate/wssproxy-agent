@@ -1,9 +1,8 @@
 {
   "name": "wssagent",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "description": "a local proxy server as an agent connecting to remote websocket proxy server",
   "main": "wssagent.js",
-  "type": "module",
   "scripts": {
     "start": "node ./wssagent.js",
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -28,7 +27,7 @@
   },
   "homepage": "https://github.com/httpgate/wssproxy-agent#readme",
   "dependencies": {
-    "dns-over-http-resolver": "^2.1.1",
+    "dns-over-http-resolver": "1.2.3",
     "readline-sync": "^1.4.10",
     "ws": "^8.12.1"
   }

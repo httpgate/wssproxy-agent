@@ -12,5 +12,4 @@ var configs =
         wssip : ''
 } ;
 
-import * as wssagent from '../wssagent.js';
-wssagent.run(configs);
+require('../wssagent.js').run(configs);

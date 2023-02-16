@@ -1,12 +1,11 @@
 #!/usr/bin/env node
 
-import * as net from 'net';
-import * as tls from 'tls';
-import * as url from 'url';
-import WebSocket from 'ws';
-import Resolver from 'dns-over-http-resolver';
-import * as readline from 'readline-sync';
-
+const net = require('net');
+const tls = require('tls');
+const url = require('url');
+const WebSocket = require('ws');
+const readline = require('readline-sync');
+const Resolver = require('dns-over-http-resolver');
 const resolver = new Resolver();
 
 //wss url like wss://site.domain/url
@@ -143,6 +142,6 @@ function connect() {
   }
 }
 
-if(process.argv[1].includes(url.fileURLToPath(import.meta.url))) run();
+if(process.argv[1].includes(__filename)) run();
 
-export { run };
+exports.run = run ;

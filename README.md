@@ -17,13 +17,17 @@ A local proxy agent connecting to remote websocket proxy server
 
 # 运行
 
-可下载直接点击[绿色可执行文件](https://github.com/httpgate/resouces/tree/main/wssproxy-agent)，或加上可选命令行参数。默认只本机能用代理，加-s可分享本机IP和端口给同一网段：
+可下载直接点击[绿色可执行文件](https://github.com/httpgate/resouces/tree/main/wssproxy-agent)，或在命令行执行，加上可选参数:
 
-node ./wssagent.js [wssurl] [proxy-port] [-s] [DOH-Url]
+node ./wssagent.js [wssurl] [proxy-port] [-s] [wssip]
 
-./wssagent-linux [wssurl] [proxy-port] [-s] [DOH-Url]
+./wssagent-linux [wssurl] [proxy-port] [-s] [wssip]
 
-Linux系统下的可执行文件只能在命令行下执行，除了wssurl外其它参数不是必须输入
+* Linux系统下的可执行文件只能在命令行下执行，除了wssurl外其它参数不是必须输入
+
+* 默认只本机能用代理，加 -s 可分享本机IP和端口给同一网段：
+
+* 如指定wssip，则wssurl里的域名可以为任意域名以避开域名审查，并隐藏真实域名
 
 手机用户参照[Android系统wssagent说明](\/run-in-container\/README\.md)
 

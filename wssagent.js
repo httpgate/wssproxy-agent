@@ -1,26 +1,38 @@
 #!/usr/bin/env node
 
+import * as net from 'net';
+import * as tls from 'tls';
+import * as url from 'url';
+import WebSocket from 'ws';
+import Resolver from 'dns-over-http-resolver';
+import * as readline from 'readline-sync';
+
+const resolver = new Resolver();
+
 //wss url like wss://site.domain/url
 var wssurl = '';
-//proxy server listening port，same as port in firefox proxy
-var proxyport = 0 ;
+//wssagent listening port，also proxy port in firefox settings
+var proxyport = 3128 ;
+//wss servr ip address
+var wssip = '';
+
 var shareproxy = false;
 var dohUrl = 'https://mozilla.cloudflare-dns.com/dns-query';
-var dohnut = false;
 var server = false;
 var tlsserver = false;
 var istls = false;
+var connOptions = {lookup : wsslookup};
 
-const net = require('net');
-const tls = require('tls');
-const WebSocket = require('ws');
-const readline = require('readline-sync');
-const dns = require('dns');
-const { Dohnut } = require('dohnut');
-const dnsServer = '127.0.0.1:' + getRandomInt(42099,51392);
-
-function getRandomInt(min, max) {
-  return Math.floor(Math.random() * (max - min + 1)) + min;
+function wsslookup(hostname, opts, cb) {
+  if(wssip) return cb(null, wssip, 4); 
+  resolver.resolve4(hostname)
+  .then( ips => {
+      wssip=ips[0];
+      cb(null, wssip, 4); 
+  })
+  .catch(err => {
+      console.log(err);
+  });  
 }
 
 function run(configs){
@@ -28,7 +40,7 @@ function run(configs){
     wssurl = configs.wssurl;
     if('proxyport' in configs) proxyport = configs.proxyport;
     if('shareproxy' in configs) shareproxy = configs.shareproxy;
-    if('dohUrl' in configs) dohUrl = configs.dohUrl;    
+    if(configs.wssip) wssip = configs.wssip;    
   }
   else if(process.argv[2]){
     wssurl = process.argv[2];
@@ -37,11 +49,10 @@ function run(configs){
     
     if(process.argv[4] && (process.argv[4].toLowerCase()=='-s')) shareproxy = true;
 
+    if(process.argv[5]) wssip=process.argv[5];
+
     if(process.env.shareproxy) shareproxy = true;
-
-    if(process.argv[5] && (process.argv[5].toLowerCase().startsWith('https://'))) dohUrl = process.argv[5];
-
-    if(process.env.dohurl) dohUrl = process.env.dohurl;
+    if(process.env.wssip) wssip = process.env.dohurl;
 
   } else {
     wssurl = readline.question('\r\nInput websocket wss url:');
@@ -53,23 +64,22 @@ function run(configs){
     let inshare = readline.question('\r\nShare proxy with others? [No]:');
     if(inshare && (inshare.toLowerCase().startsWith('y'))) shareproxy = true;
 
-    let indoh = readline.question('\r\ninput DOH provider ['+dohUrl +']:\r\n');
-    if(indoh && (indoh.toLowerCase().startsWith('https://'))) dohUrl = indoh;
+    let inip = readline.question('\r\ninput wss server ip address:');
+    if(inip)  wssip = indoh;
   }
-
-  var configuration = {
-    dns: [{ type: 'udp4', addres: '127.0.0.1', port: 51392 }],
-    doh: [{ uri: dohUrl }],
-    bootstrap : '1.1.1.1',
-    countermeasures : ''
-  }
-  dohnut = new Dohnut(configuration)
   start();
 }
 
 
 function start() {
   if((!wssurl) || (!wssurl.toLowerCase().startsWith('wss://'))) return console.log('invalid wssurl');
+
+  let dohservers = resolver.getServers();
+  dohservers.unshift(dohUrl);
+  resolver.setServers(dohservers);
+  
+  if(wssip) connOptions = {lookup : wsslookup, rejectUnauthorized: false}
+
   if(!wssurl.toLowerCase().endsWith('/tls')) return connect();
 
   istls = true;
@@ -101,14 +111,12 @@ function start() {
 
 }
 
-async function connect() {  
-  await dohnut.start()
-  dns.setServers([dnsServer]);
+function connect() {  
 
   server = net.createServer(c => {
       c.setTimeout(60*1000+500);
 
-      const ws = new WebSocket(wssurl)
+      const ws = new WebSocket(wssurl, connOptions);
       ws.on('close', () => c.destroy())
       ws.on('error', () => c.destroy())
       c.on('end', () => ws.close(1000))
@@ -135,6 +143,6 @@ async function connect() {
   }
 }
 
-if(process.argv[1].includes(__filename)) run();
+if(process.argv[1].includes(url.fileURLToPath(import.meta.url))) run();
 
-exports.run = run;
+export { run };

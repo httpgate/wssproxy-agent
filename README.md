@@ -1,5 +1,5 @@
-# wssproxy-agent， abbreviated as wssagent
-A local proxy agent connecting to remote websocket proxy server
+# wssproxy-agent
+A local proxy agent connecting to remote websocket proxy server, Abbreviated as wssagent
 
 把远端的websocket加密代理服务器映射为本地的非加密普通代理服务器，简称为wssagent
 
@@ -10,7 +10,7 @@ A local proxy agent connecting to remote websocket proxy server
 
 需要先运行[pacproxy服务](https://github.com/httpgate/pacproxy.js) ， 运行后屏幕会显示 wssurl
 
-运行wssagent, 输入wssurl
+运行wssagent, 输入WSSURL
 
 浏览器或者wifi设置代理服务器为 localhost , 代理端口为wssagent显示的端口, 就可以加密翻墙
 
@@ -31,9 +31,9 @@ node ./wssagent.js [WSSURL] [PROXY_PORT] [-s] [WSSIP or DOH_SERVER]
 
 * 默认只本机能用代理，加 -s 可分享本机IP和端口给同一网段，其他参数说明见 [.env文件](\.env)
 
-* WSSIP是代理服务器的IP, 指定WSSIP将绕开DNS解析，加快速度并避免域名劫持或DNS封锁；
+* WSSIP是代理服务器的IP, 指定WSSIP将绕开DNS解析，加快速度并避免域名劫持或DNS封锁
 
-* 如WSSIP是直连IP，则可替换WSSURL里的域名为一个伪造域名以避开域名审查，以隐藏真实域名，如果是CDN中转IP则不能修改域名。伪造域名需避开常见已知域名，尤其是已经被封锁的域名。
+* 如WSSIP是直连IP，则可替换WSSURL里的域名为一个伪造域名以避开域名审查，隐藏真实域名。如果是CDN中转IP则不能修改域名。伪造域名需避开常见已知域名，尤其是已经被封锁的域名
 
 手机用户参照[Android系统wssagent说明](\/run-in-container\/README\.md)
 

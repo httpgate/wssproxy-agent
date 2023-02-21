@@ -15,22 +15,24 @@ const defaultDohIps = ['104.16.249.249', '104.16.248.249'];
 var wssurl = '';
 //wssagent listening port，also proxy port in firefox settings
 var proxyport = 0 ;
-//websocket proxy servr ip address
+//proxy servr ip address
 var wssip = '';
 //share proxy in local network
 var shareproxy = false;
 //DOH(DNS Over Https) server domain
 var dohServer = 'mozilla.cloudflare-dns.com';
+//connect Domain will replace domain in wssurl when connecting to proxy
+var connectDomain = '';
 
 var dohips = false;
 var wssips = [];
 var server = false;
 var tlsserver = false;
 var istls = false;
-var connOptions = {lookup : wssLookup};
 var random = 0;
 var nextResolveTime = Date.now();
 var dohfailtime = 0;
+var wssDomain = '';
 
 function getRandomInt (min, max) {
   return Math.floor(Math.random() * (max - min + 1)) + min
@@ -47,7 +49,11 @@ function getRandom(arr) {
   return arr[choice];
 }
 
-function dohDnsLookup(hostname, opts, cb) {
+function localhostLookup(hostname, opts, cb) {
+  cb(null, '127.0.0.1', 4);
+}
+
+function dohLookup(hostname, opts, cb) {
   if(dohips) return cb(null, getRandom(dohips), 4);
 
   dnsPromises.resolve4(hostname)
@@ -93,7 +99,7 @@ function dohResolve(host) {
       'Content-Type': 'application/dns-message',
       'Content-Length': Buffer.byteLength(buf)
     },
-    lookup: dohDnsLookup
+    lookup: dohLookup
   }
 
   return new Promise(function(resolve, reject) {
@@ -147,7 +153,8 @@ function wssLookup(hostname, opts, cb) {
     .then( ips =>{
       wssips = ips;
       cb(null, getRandom(ips), 4);
-      console.log(err);
+      console.log('\r\nWARNING!!! DOH DNS failed, switich to normal DNS, your proxy real domain might be exposed!');
+      console.log('\r\n' + err);
       ips.forEach(ip => console.log('\r\nDNS Got Proxy Server IP:' +ip));
     })
     .catch( error =>{
@@ -168,23 +175,27 @@ function run(configs){
     if('shareproxy' in configs) shareproxy = configs.shareproxy;
     if(configs.wssip) wssip = configs.wssip;
     if(configs.dohServer) dohServer = configs.dohServer;
+    if(configs.connectDomain) connectDomain = configs.connectDomain;
   }
   else if(process.argv[2]){
     wssurl = process.argv[2];
 
     if(process.argv[3] && !isNaN(process.argv[3])) proxyport = process.argv[3];
-    else if(process.env.PROXY_PORT) proxyport = process.env.PROXYPORT;
+    else if(process.env.PROXY_PORT) proxyport = process.env.PROXY_PORT;
     
     if(process.argv[4] && (process.argv[4].toLowerCase()=='-s')) shareproxy = true;
-    if(process.env.SHARE_PROXY) shareproxy = true;
+    else if(process.env.SHARE_PROXY) shareproxy = true;
 
+    let inip='';
     if(process.argv[5]) inip=process.argv[5];
-  
     if(inip && ipv4.isFormat(inip.trim()))  wssip = inip.trim();
     else if(inip) dohServer = inip.trim();
     else if(process.env.DOH_SERVER) dohServer = process.env.DOH_SERVER;
 
     if((!wssip) && process.env.WSSIP) wssip = process.env.WSSIP;
+
+    if(process.argv[6]) connectDomain = process.argv[6];
+    else if(process.env.CONNECT_DOMAIN) connectDomain = process.env.CONNECT_DOMAIN;
 
   } else if(process.env.WSSURL) {
     wssurl = process.env.WSSURL;
@@ -192,38 +203,53 @@ function run(configs){
     if(process.env.SHARE_PROXY) shareproxy = true;
     if(process.env.WSSIP) wssip = process.env.WSSIP;
     if(process.env.DOH_SERVER) dohServer = process.env.DOH_SERVER;  
+    if(process.env.CONNECT_DOMAIN) connectDomain = process.env.CONNECT_DOMAIN;
+  
     console.log('\r\n Run as .env settings');
   } else {
-    wssurl = readline.question('\r\nInput websocket wss url:');
+    wssurl = readline.question('\r\nInput websocket wss url: ');
     if((!wssurl) || (!wssurl.toLowerCase().startsWith('wss://'))) return readline.question('\r\nivalid websocket wss url[ok]');
 
     if(process.env.PROXY_PORT) proxyport = process.env.PROXY_PORT;
     else{
-      let inport = readline.question('\r\nInput proxy port [Random]:');
+      let inport = readline.question('\r\nInput proxy port [Random]: ');
       if(inport && (!isNaN(inport))) proxyport = inport;
     }
 
     if(process.env.SHARE_PROXY) shareproxy = true;
     else {
-      let inshare = readline.question('\r\nShare proxy with others? [No]:');
+      let inshare = readline.question('\r\nShare proxy with others? [No]: ');
       if(inshare && (inshare.toLowerCase().startsWith('y'))) shareproxy = true;
     }
 
     if(process.env.WSSIP) wssip = process.env.WSSIP;
     else if(process.env.DOH_SERVER) dohServer = process.env.DOH_SERVER;
     else{
-      let inip = readline.question('\r\ninput DOH server domain, or proxy server ip address [Skip]:');
+      let inip = readline.question('\r\nInput DOH server domain, or proxy server ip address [Skip]: ');
       if(inip && ipv4.isFormat(inip.trim()))  wssip = inip.trim();
       else if(inip) dohServer = inip.trim();
     }
+
+    if(wssip){
+      let inconndomain = readline.question('\r\nIf directly connect to proxy server (not CDN), Input a Connect Domain to avoid SNI-based HTTPS Filtering, \r\nand hide real domain [Skip]: ');
+      if(inconndomain) connectDomain = inconndomain;
+    }
   }
   console.log('\r\nDOH Server：' + dohServer);
+
+  if((!wssurl) || (!wssurl.toLowerCase().startsWith('wss://'))) return console.log('invalid wssurl');
+
+  let url = new URL(wssurl);
+  wssDomain = url.host;
+  if(wssip && connectDomain){
+    url.host = connectDomain;
+    wssurl = url.toString();
+  }
+
   start();
 }
 
 function start() {
-  if((!wssurl) || (!wssurl.toLowerCase().startsWith('wss://'))) return console.log('invalid wssurl');
-  if(wssip) connOptions = {lookup : wssLookup, rejectUnauthorized: false}
   if(!wssurl.toLowerCase().endsWith('/tls')) return connect();
 
   istls = true;
@@ -235,7 +261,11 @@ function start() {
 
   tlsserver = net.createServer(function(socket) {
     socket.setTimeout(60*1000+800);
-    let upstream = tls.connect(server.address().port, '127.0.0.1', {rejectUnauthorized: false});
+
+    let connOptions = {lookup : localhostLookup, rejectUnauthorized: false};
+    if(wssip) connOptions = {lookup : localhostLookup}
+
+    let upstream = tls.connect(server.address().port, wssDomain, connOptions);
     socket.on('end', () => upstream.destroy());
     socket.on('error', () => upstream.destroy());
     upstream.on('end', () => socket.destroy());
@@ -258,6 +288,9 @@ function start() {
 function connect() {  
   server = net.createServer(c => {
       c.setTimeout(60*1000+500);
+
+      let connOptions = {lookup : wssLookup};
+      if(wssip && connectDomain) connOptions = {lookup : wssLookup, rejectUnauthorized: false}
 
       const ws = new WebSocket(wssurl, connOptions);
       ws.on('close', () => c.destroy())

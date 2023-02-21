@@ -235,7 +235,7 @@ function run(configs){
       if(inconndomain) connectDomain = inconndomain;
     }
   }
-  console.log('\r\nDOH Server：' + dohServer);
+  console.log('\r\nDOH Server: ' + dohServer);
 
   if((!wssurl) || (!wssurl.toLowerCase().startsWith('wss://'))) return console.log('invalid wssurl');
 

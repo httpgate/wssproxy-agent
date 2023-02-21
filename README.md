@@ -8,7 +8,7 @@ A local proxy agent connecting to remote websocket proxy server. Abbreviated as 
 
 # 使用
 
-需要先运行[pacproxy服务](https://github.com/httpgate/pacproxy.js) ， 运行后屏幕会显示 wssurl
+需要先运行[pacproxy服务](https://github.com/httpgate/pacproxy.js) ， 运行后屏幕会显示 WSSURL
 
 运行wssagent, 输入WSSURL
 
@@ -49,6 +49,6 @@ node ./wssagent.js [WSSURL] [PROXY_PORT] [-s] [WSSIP or DOH_SERVER] [CONNECT_DOM
 
 * 如果不信任中转流量的CDN, 则可以在CDN的[WSSURL]后面加 /tls , 此时穿越CDN的流量会加密，CDN不能探测你所访问的网站和内容，即使访问不加密的http网站对CDN也是不可知的。直连pacproxy服务器时一般不需要加/tls参数。
 
-* 如果直连pacproxy时指定了[WSSIP]和[CONNECT_DOMAIN], 为避免IP劫持（虽然比较少见）, 可在直连的[WSSURL]后面加 /tls , 此时会在tls加密连接时验证服务器的数字证书，确保真的连接到了pacproxy服务器。
+* 如果直连pacproxy时指定了[WSSIP]和[CONNECT_DOMAIN], 会略过服务器数字证书验证。为避免IP劫持（虽然比较少见）, 可在直连的[WSSURL]后面加 /tls , 会在tls加密连接时验证服务器的数字证书，确保连接到了真的pacproxy服务器。
 
 * 如果不信任pacproxy所运行的服务器， 则可以和无界，自由门混合使用。将无界，自由门的代理端口设置为wssagent的端口，浏览器则设置为无界/自由门的端口。这样pacproxy并不知道你具体访问了哪些网站，如原来连不上无界，自由门此时也可以连上。

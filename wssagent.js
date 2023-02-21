@@ -263,7 +263,7 @@ function start() {
     socket.setTimeout(60*1000+800);
 
     let connOptions = {lookup : localhostLookup, rejectUnauthorized: false};
-    if(wssip) connOptions = {lookup : localhostLookup}
+    if(wssip && connectDomain) connOptions = {lookup : localhostLookup};
 
     let upstream = tls.connect(server.address().port, wssDomain, connOptions);
     socket.on('end', () => upstream.destroy());
@@ -290,7 +290,7 @@ function connect() {
       c.setTimeout(60*1000+500);
 
       let connOptions = {lookup : wssLookup};
-      if(wssip && connectDomain) connOptions = {lookup : wssLookup, rejectUnauthorized: false}
+      if(wssip && connectDomain) connOptions = {lookup : wssLookup, rejectUnauthorized: false} ;
 
       const ws = new WebSocket(wssurl, connOptions);
       ws.on('close', () => c.destroy())

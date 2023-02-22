@@ -20,7 +20,7 @@ var wssip = '';
 //share proxy in local network
 var shareproxy = false;
 //DOH(DNS Over Https) server domain
-var dohServer = 'mozilla.cloudflare-dns.com';
+var dohServer = '';
 //connect Domain will replace domain in wssurl when connecting to proxy
 var connectDomain = '';
 
@@ -30,7 +30,6 @@ var server = false;
 var tlsserver = false;
 var istls = false;
 var random = 0;
-var nextResolveTime = Date.now();
 var dohfailtime = 0;
 var wssDomain = '';
 
@@ -40,7 +39,7 @@ function getRandomInt (min, max) {
 
 function getRandom(arr) {
   if(!arr) return false;
-  if(!Array.isArray(arr)) return false;
+  if(!Array.isArray(arr)) return arr;
   if(arr.length==0) return false;
   if(arr.length==1) return arr[0];
   random++;
@@ -74,7 +73,8 @@ function dohLookup(hostname, opts, cb) {
         return cb(null, getRandom(dohips), 4);        
       }
       console.log('local dns error:' + error);
-      console.log('\r\n DOH (DNS over https) Server %s not found, specifiy another DOH server domain, or specify proxy server IP', dohServer);
+      console.log('\r\n DOH Server %s DNS record not found, specifiy another DOH server domain, or specify proxy server IP(WSSIP)', dohServer);
+      cb(error);
     });
   });
 }
@@ -99,6 +99,7 @@ function dohResolve(host) {
       'Content-Type': 'application/dns-message',
       'Content-Length': Buffer.byteLength(buf)
     },
+    timeout: 1000,
     lookup: dohLookup
   }
 
@@ -111,7 +112,7 @@ function dohResolve(host) {
       res.on('data', (d) => {
         let data = dnsPacket.decode(d);
         if(!data.answers) reject('DOH: wrong dns data');
-        if(data.answers.length==0) reject('DOH: invalid server domain ' + host);
+        if(data.answers.length==0) reject('DOH: no dns record for domain: ' + host);
         resolve(data.answers.filter(answer => {return answer.type=='A'} ));
       });
     })
@@ -126,42 +127,37 @@ function dohResolve(host) {
 }
 
 function wssLookup(hostname, opts, cb) {
-  if(wssip) return cb(null, wssip, 4); 
-  if(wssips.length>0){
-    cb(null, getRandom(wssips), 4);
-    if(!dohips) return;
-    if(dohfailtime>5) return;
-    if(Date.now()<nextResolveTime) return;
-  }
-  nextResolveTime = Date.now() + getRandomInt(300,900)*1000;
-  dohResolve(hostname)
-  .then( answers => {
-      dohfailtime = 0;
-      let wssipsize = wssips.length;
-      answers.forEach(answer => {
-        if(wssips.some(ip => ip==answer.data)) return;
-        wssips.push(answer.data);
-        console.log('\r\nDOH Got Proxy Server IP:' + answer.data );
-      });
-      if(wssipsize==0) cb(null, getRandom(wssips), 4); 
-  })
-  .catch(err => {
-    dohfailtime++;
-    if(wssips.length!=0) return console.log(err);
-    else if(dohfailtime<5) return console.log(err);
-    dnsPromises.resolve4(hostname)
-    .then( ips =>{
-      wssips = ips;
-      cb(null, getRandom(ips), 4);
-      console.log('\r\nWARNING!!! DOH DNS failed, switich to normal DNS, your proxy real domain might be exposed!');
-      console.log('\r\n' + err);
-      ips.forEach(ip => console.log('\r\nDNS Got Proxy Server IP:' +ip));
+  if(wssips && (wssips.length>0)) return cb(null, getRandom(wssips), 4);
+
+  if(!dohServer) dohfailtime=100;
+  else
+    dohResolve(hostname)
+    .then( answers => {
+        dohfailtime = 0;
+        if(wssips.length > 0) return;
+        wssips = answers.map(answer => answer.data );
+        wssips.forEach(ip => console.log('\r\nDOH Got Proxy Server IP (WSSIP): ' + ip));
+        return cb(null, getRandom(wssips), 4); 
     })
-    .catch( error =>{
-      console.log(err);
-      console.log(error);
-      console.log('\r\nPlease specify WSSIP, or use a different WSSURL');
+    .catch(err => {
+        dohfailtime++;
+        console.log('\r\n' + err);
     });
+
+  if(dohfailtime<2) return;
+  console.log('\r\nWARNING! DOH DNS failed, use normal DNS, your proxy real domain might be exposed!');
+
+  dnsPromises.resolve4(hostname)
+  .then( ips =>{
+    if(wssips.length > 0) return;
+    wssips = ips;
+    ips.forEach(ip => console.log('\r\nDNS Got Proxy Server IP (WSSIP): ' + ip));
+    return cb(null, getRandom(ips), 4);
+  })
+  .catch( error =>{
+    console.log(error);
+    console.log('\r\nPlease specify WSSIP, or use a different WSSURL');
+    cb(error);
   });
 }
 
@@ -171,6 +167,7 @@ require('dotenv').config();
 function run(configs){
   if(configs) {
     wssurl = configs.wssurl;
+    if(!wssurl.toLowerCase().startsWith('wss://')) return console.log('invalid wssurl');
     if('proxyport' in configs) proxyport = configs.proxyport;
     if('shareproxy' in configs) shareproxy = configs.shareproxy;
     if(configs.wssip) wssip = configs.wssip;
@@ -179,26 +176,40 @@ function run(configs){
   }
   else if(process.argv[2]){
     wssurl = process.argv[2];
-
-    if(process.argv[3] && !isNaN(process.argv[3])) proxyport = process.argv[3];
+    if(!wssurl.toLowerCase().startsWith('wss://')) return console.log('invalid wssurl');
+    let i=3;
+    
+    if(process.argv[i] && (!isNaN(process.argv[i]))) {
+      proxyport = process.argv[i];
+      i++;
+    }
     else if(process.env.PROXY_PORT) proxyport = process.env.PROXY_PORT;
     
-    if(process.argv[4] && (process.argv[4].toLowerCase()=='-s')) shareproxy = true;
+    if(process.argv[i] && (process.argv[i].toLowerCase()=='-s')) {
+      shareproxy = true;
+      i++;
+    }
     else if(process.env.SHARE_PROXY) shareproxy = true;
-
-    let inip='';
-    if(process.argv[5]) inip=process.argv[5];
-    if(inip && ipv4.isFormat(inip.trim()))  wssip = inip.trim();
-    else if(inip) dohServer = inip.trim();
+    
+    if(process.argv[i] && !ipv4.isFormat(process.argv[i].trim().split(',')[0])) {
+      dohServer = process.argv[i].trim();
+      i++;
+    }
     else if(process.env.DOH_SERVER) dohServer = process.env.DOH_SERVER;
 
-    if((!wssip) && process.env.WSSIP) wssip = process.env.WSSIP;
+    if(process.argv[i] && ipv4.isFormat(process.argv[i].trim().split(',')[0])) {
+      wssip = process.argv[i].trim();
+      i++;
+    }  
+    else if(process.env.WSSIP) wssip = process.env.WSSIP;
 
-    if(process.argv[6]) connectDomain = process.argv[6];
+    if(process.argv[i]) connectDomain = process.argv[i];
     else if(process.env.CONNECT_DOMAIN) connectDomain = process.env.CONNECT_DOMAIN;
 
   } else if(process.env.WSSURL) {
     wssurl = process.env.WSSURL;
+    if(!wssurl.toLowerCase().startsWith('wss://')) return console.log('invalid wssurl');
+
     if(process.env.PROXY_PORT) proxyport = process.env.PROXY_PORT;
     if(process.env.SHARE_PROXY) shareproxy = true;
     if(process.env.WSSIP) wssip = process.env.WSSIP;
@@ -223,21 +234,32 @@ function run(configs){
     }
 
     if(process.env.WSSIP) wssip = process.env.WSSIP;
-    else if(process.env.DOH_SERVER) dohServer = process.env.DOH_SERVER;
     else{
-      let inip = readline.question('\r\nInput DOH server domain, or proxy server ip address [Skip]: ');
+      let inip = readline.question('\r\nInput proxy server ip address (WSSIP) [Skip]: ');
       if(inip && ipv4.isFormat(inip.trim()))  wssip = inip.trim();
-      else if(inip) dohServer = inip.trim();
+      else if(inip) wssip = inip.trim();
     }
 
-    if(wssip){
-      let inconndomain = readline.question('\r\nIf directly connect to proxy server (not CDN), Input a Connect Domain to avoid SNI-based HTTPS Filtering, \r\nand hide real domain [Skip]: ');
+    if(process.env.DOH_SERVER) dohServer = process.env.DOH_SERVER;
+    else if(!wssip){
+      let indoh = readline.question('\r\nInput DOH (DNS over Https) server domain [Skip]: ');
+      if(indoh) dohServer = indoh.trim();
+    }
+
+    if(process.env.CONNECT_DOMAIN) connectDomain = process.env.CONNECT_DOMAIN;
+    else if(wssip){
+      let inconndomain = readline.question('\r\nIf directly connect to proxy server (not CDN), input a Connect Domain to avoid SNI-based HTTPS Filtering, \r\nand hide real domain [Skip]: ');
       if(inconndomain) connectDomain = inconndomain;
     }
   }
-  console.log('\r\nDOH Server: ' + dohServer);
 
-  if((!wssurl) || (!wssurl.toLowerCase().startsWith('wss://'))) return console.log('invalid wssurl');
+  if(wssip) wssips = wssip.split(',');
+
+  console.log('\r\nShare Proxy: ' + shareproxy);
+  console.log('\r\nDOH Server: ' + dohServer);
+  console.log('\r\nWSSIP: ' + JSON.stringify(wssips));
+  console.log('\r\nConnect Domain: ' + connectDomain);
+
 
   let url = new URL(wssurl);
   wssDomain = url.host;
@@ -245,6 +267,8 @@ function run(configs){
     url.host = connectDomain;
     wssurl = url.toString();
   }
+
+  if(!wssip) wssLookup(wssDomain,{},err=>console.log(err?err:''));
 
   start();
 }

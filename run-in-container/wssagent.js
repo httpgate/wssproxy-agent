@@ -11,7 +11,7 @@ var configs =
     //设置为 true 可以分享代理给局域网内的其他电脑，默认是 false, 只有localhost可以访问代理
         shareproxy : false ,
         
-    //代理服务器IP地址, 格式：'xxx.xxx.xxx.xxx', 指定IP可绕开DNS解析，避免域名劫持或DNS封锁
+    //代理服务器IP地址, 格式：'xxx.xxx.xxx.xxx', 多个IP用英文小写逗号 , 隔开。指定IP可绕开DNS解析，避免域名劫持或DNS封锁
         wssip : '',
 
     //连接域名，连接代理服务器时此域名会替换掉 wssurl 里的域名，以避开域名审查，隐藏真实域名

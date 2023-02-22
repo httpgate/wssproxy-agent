@@ -25,11 +25,11 @@ node ./wssagent.js  [WSSURL]  [PROXY_PORT]  [-s]  [DOH_SERVER]  [WSSIP]  [CONNEC
 
 ./wssagent-linux  [WSSURL]  [PROXY_PORT]  [-s]  [DOH_SERVER]  [WSSIP]  [CONNECT_DOMAIN]
 
-或编辑wssagent同一目录下的 [wss.env文件](\wss.env)，设置运行参数
+或编辑wssagent同一目录下的 [wss.env文件](\/wss.env)，设置运行参数
 
 * Linux系统下的可执行文件只能在命令行下执行，除了[WSSURL]外其它参数不是必须输入
 
-* 默认只本机能用代理，加 -s 可分享本机IP和端口给同一网段，其他参数说明见 [wss.env文件](\wss.env)
+* 默认只本机能用代理，加 -s 可分享本机IP和端口给同一网段，其他参数说明见 [wss.env文件](\/wss.env)
 
 * [WSSIP]是代理服务器的IP, 指定[WSSIP]将绕开DNS解析，避免域名劫持或DNS封锁
 

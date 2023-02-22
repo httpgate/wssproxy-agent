@@ -28,12 +28,13 @@ node ./wssagent.js  [WSSURL]  [PROXY_PORT]  [-s]  [DOH_SERVER]  [WSSIP]  [CONNEC
 或编辑wssagent同一目录下的 [wss.env文件](\/wss.env)，设置运行参数
 
 * Linux系统下的可执行文件只能在命令行下执行，除了[WSSURL]外其它参数不是必须输入
-
 * 默认只本机能用代理，加 -s 可分享本机IP和端口给同一网段，其他参数说明见 [wss.env文件](\/wss.env)
 
 * [WSSIP]是代理服务器的IP, 指定[WSSIP]将绕开DNS解析，避免域名劫持或DNS封锁
 
 * 如[WSSIP]是直连IP，可设置一个编造的域名[CONNECT_DOMAIN]，连接代理服务器时会自动替换[WSSURL]里的域名，以避开域名审查，隐藏真实域名。如果是CDN中转IP则不能用[CONNECT_DOMAIN]。编造域名需避开常见已知域名，尤其是已经被封锁的域名
+
+* [CONNECT_DOMAIN]仅在指定[WSSIP]时生效，[WSSIP]并不需要绑定域名记录。很多VPS可以动态增加IP地址，新加的IP地址重启pacproxy服务后就可以用作[WSSIP]
 
 手机用户参照[Android系统wssagent说明](\/run-in-container\/README\.md)
 

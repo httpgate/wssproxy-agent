@@ -31,7 +31,7 @@ node ./wssagent.js  [WSSURL]  [PROXY_PORT]  [-s]  [DOH_SERVER]  [WSSIP]  [CONNEC
 
 * 默认只本机能用代理，加 -s 可分享本机IP和端口给同一网段，其他参数说明见 [wss.env文件](\wss.env)
 
-* WSSIP是代理服务器的IP, 指定WSSIP将绕开DNS解析，避免域名劫持或DNS封锁
+* [WSSIP]是代理服务器的IP, 指定[WSSIP]将绕开DNS解析，避免域名劫持或DNS封锁
 
 * 如[WSSIP]是直连IP，可设置一个编造的域名[CONNECT_DOMAIN]，连接代理服务器时会自动替换[WSSURL]里的域名，以避开域名审查，隐藏真实域名。如果是CDN中转IP则不能用[CONNECT_DOMAIN]。编造域名需避开常见已知域名，尤其是已经被封锁的域名
 

@@ -277,7 +277,7 @@ function run(configs){
     .then( answers => {
         let ips = answers.map(answer => answer.data );
         ips.forEach(ip => console.log('\r\nDOH Got Proxy Server IP (WSSIP): ' + ip));
-        if(ips.length>1) console.log('\r\nWSSIP: ' + wssips);
+        if(ips.length>1) console.log('\r\nWSSIP: ' + ips);
         dohurl = 'https://' + dohServer + '/dns-query';
         console.log('\r\nDOH url (for Firefox): ' + dohurl);    })
     .catch(err => {

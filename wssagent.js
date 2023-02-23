@@ -10,6 +10,7 @@ const https = require('https');
 const dnsPacket = require('dns-packet')
 const ipv4 = require('@leichtgewicht/ip-codec').v4;
 const path = require('path');
+const httpsagent = https.Agent({keepAlive: true, timeout: 300000, maxCachedSessions: 1000 });
 
 //wss url like wss://site.domain/url
 var wssurl = '';
@@ -300,7 +301,6 @@ function start() {
   connect();
 
   tlsserver = net.createServer(function(socket) {
-    socket.setTimeout(60*1000+800);
 
     let connOptions = {lookup : localhostLookup, rejectUnauthorized: false};
     if(wssip && connectDomain) connOptions = {lookup : localhostLookup};
@@ -327,10 +327,9 @@ function start() {
 
 function connect() {  
   server = net.createServer(c => {
-      c.setTimeout(60*1000+500);
 
-      let connOptions = {lookup : wssLookup};
-      if(wssip && connectDomain) connOptions = {lookup : wssLookup, rejectUnauthorized: false} ;
+      let connOptions = {lookup : wssLookup, agent: httpsagent};
+      if(wssip && connectDomain) connOptions = {lookup : wssLookup, agent: httpsagent, rejectUnauthorized: false} ;
 
       const ws = new WebSocket(wssurl, connOptions);
       ws.on('close', () => c.destroy())

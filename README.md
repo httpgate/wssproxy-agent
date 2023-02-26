@@ -43,7 +43,9 @@ node ./wssagent.js  [WSSURL]  [PROXY_PORT]  [-s]  [DOH_SERVER]  [WSSIP]  [CONNEC
 
 * 很多软件不支持https加密的pacproxy代理， 用wssagent就可以在一台电脑上把pacproxy加密代理转换成普通代理，整个局域网都可以按普通方式代理上网
 
-* 如果海外的pacproxy服务器被封了，这有可能是IP被封了，或者域名被封了。这时你可以自己在cloudflare之类的支持websocket的CDN上注册一个账户, 再[注册一个域名](https://github.com/httpgate/pacproxy.js/blob/main/documents/About_Domain_ZH.md)， 再在CDN上把这个域名指向你远端的pacproxy服务器，SSL/TLS mode设置为FULL, 然后把[WSSURL]wssurl中的域名改成你注册的域名, 就又可以连上了。enjoy and, 法轮大法好，真善忍好。
+* 如果海外的pacproxy服务器被封了，这有可能是IP被封了，或者域名被封了。这时你可以自己在cloudflare之类的支持websocket的CDN上注册一个账户, 再[注册一个域名](https://github.com/httpgate/pacproxy.js/blob/main/documents/About_Domain_ZH.md)， 再在CDN上把这个域名指向你远端的pacproxy服务器，SSL/TLS mode设置为FULL, 然后把[WSSURL]中的域名改成你注册的域名, 就又可以连上了。enjoy and, 法轮大法好，真善忍好。
+
+* 如果pacurl直连被封锁，但[WSSURL]方式能连通，可以找一台墙内有公网IP的服务器运行wssagent，在[WSSURL]后加 /pac, [PROXY_PORT]设置为443，[SHARE_PROXY]设置为true, 运行后就相当于把海外的pacproxy搬到了墙内服务器上，只是域名DNS还是指向海外服务器。需要pacurl直连翻墙的电脑，可以把在本机的hosts文件加一条记录，把服务器域名指向墙内服务器，就可以像以前一样直接用pacurl翻墙了。 Android不能设置hosts, 则可以找一个可以自定义DNS记录的私有DNS服务，创建一个账号，把这条DNS记录加好后，Android系统设置private DNS为你的DNS账号地址，或者firefox设置DOH为你DNS账号的DOH地址。
 
 
 # 安全

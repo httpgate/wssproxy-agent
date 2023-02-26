@@ -55,3 +55,12 @@ node ./wssagent.js  [WSSURL]  [PROXY_PORT]  [-s]  [DOH_SERVER]  [WSSIP]  [CONNEC
 * 如果直连pacproxy时指定了[WSSIP]和[CONNECT_DOMAIN], 会略过服务器数字证书验证。为避免IP劫持（虽然比较少见）, 可在直连的[WSSURL]后面加 /tls , 会在tls加密连接时验证服务器的数字证书，确保连接到了真的pacproxy服务器。
 
 * 如果不信任pacproxy所运行的服务器， 则可以和无界，自由门混合使用。将无界，自由门的代理端口设置为wssagent的端口，浏览器则设置为无界/自由门的端口。这样pacproxy并不知道你具体访问了哪些网站，如原来连不上无界，自由门此时也可以连上。
+
+
+## 推荐
+
+推荐用prcproxy安全的访问以下网站：
+* 明慧网：https://www.minghui.org
+* 干净世界：https://www.ganjing.com
+* 神韵作品: https://shenyunzuopin.com
+* 大法经书: https://www.falundafa.org

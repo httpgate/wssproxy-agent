@@ -29,7 +29,6 @@ var dohips = false;
 var wssips = [];
 var server = false;
 var tlsserver = false;
-var istls = false;
 var random = 0;
 var dohfailtime = 0;
 var wssDomain = '';
@@ -291,9 +290,9 @@ function run(configs){
 }
 
 function start() {
-  if(!wssurl.toLowerCase().endsWith('/tls')) return connect();
+  if(wssurl.toLowerCase().endsWith('/pac')) return connect();
+  else if(!wssurl.toLowerCase().endsWith('/tls')) return connect();
 
-  istls = true;
   let vshare = shareproxy;
   let vport = proxyport;
   shareproxy = false;
@@ -349,7 +348,8 @@ function connect() {
   })
 
   let cb = {};
-  if(!istls) cb = ()=>console.log('\r\nwssagent serve in port : ' + server.address().port);
+  if(wssurl.toLowerCase().endsWith('/pac'))  cb = ()=>console.log('\r\nwssagent pac serve in port : ' + server.address().port);
+  else if(!wssurl.toLowerCase().endsWith('/tls'))  cb = ()=>console.log('\r\nwssagent serve in port : ' + server.address().port);
 
   if(shareproxy){
     server.listen(proxyport, cb);

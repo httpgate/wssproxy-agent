@@ -9,7 +9,7 @@
 
 设置新增dns记录 Name: xxx.example.com , Type: CNAME , Target: dns.google
 
-并不是所有的DOH服务都支持CDN中转，如cloudflare和nextdns的doh服务就不支持中转，所以设置好需要测试能用
+并不是所有的DOH服务都支持CDN中转，如cloudflare和nextdns的doh服务就不支持中转，需要创建worker用workers route*
 
 保存后，用wssagent测试新的[DOH_SERVER]: xxx.example.com,  如果能获取到[WSSIP]说明CDN中转成功
 
@@ -22,7 +22,7 @@
 
 ## 阻止老的/dns-query被探测
 
-Cloudflare中可选择菜单 Rules -> Transform Rules -> Create Rule -> Create firewall rule
+Cloudflare中可选择菜单 Security -> WAF -> Create Rule -> Create firewall rule
 
 需要设定条件 host 是刚定义的 xxx.example.com , URI Path 是 /dns-query
 
@@ -52,3 +52,50 @@ Cloudflare中可选择菜单 Rules -> Transform Rules -> Create Rule
 
 ![CDN中转DOH服务](dnsurlrewrite.JPG)
 
+
+## 某些特定DOH服务需要用workers route
+
+某些特定DOH服务如nextdns.io , 可能限制了hosts必须是nextdns.io, 在Cloudflare只能用workers来中转
+
+如果你已经在cloudflare上有一个叫 example.com 的域名，则需要增加一条dns记录，如: xxx.example.com
+
+设置新增dns记录 Name: xxx.example.com , Type: CNAME , Target: workers.dev
+
+再新增一个workers, 假如取名为 dnsquery, 参考代码：
+
+```
+const ACCESS_URI = '/randomurl';
+const DNS_URI = '/dns-query'
+const DOH_SERVER = 'dns.nextdns.io';
+
+export default {
+  async fetch(request, env) {
+    try {
+      const parsed = new URL(request.url);
+      if (parsed.pathname.startsWith(ACCESS_URI)) {
+        parsed.host = DOH_SERVER;
+        parsed.pathname = parsed.pathname.replace(ACCESS_URI,DNS_URI);
+        let target = new Request(parsed.toString(), {
+          body: request.body,
+          headers: request.headers,
+          method: request.method,
+          redirect: request.redirect
+        });
+        return fetch(target);
+      }
+    } catch(err) {
+      return new Response(err.stack, { status: 500 })
+    }
+  }
+}
+```
+
+再在examples.com网站上增加 Workers Route
+
+选 Workers Route -> Http Route -> Add Route
+
+Route 填：https://xxx.example.com/randomurl ,  Service 填：dnsquery
+
+保存后，用wssagent测试新的[DOH_SERVER]: https://xxx.example.com/randomurl,  如果能获取到[WSSIP]说明CDN中转成功
+
+有关 Cloudflare Workers 可参照： https://github.com/httpgate/cdn-edge-script

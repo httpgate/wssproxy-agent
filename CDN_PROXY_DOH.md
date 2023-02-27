@@ -16,11 +16,11 @@
 在Firefox中设置新的加密DNS为： https://xxx.example.com/dns-query
 
 
-## * 防止DOH服务探测
+## 防止DOH服务探测
 
 避免CDN中转的DOH服务被探测到，需要改变默认的网址/dns-query , 比如我们想改成/randomurl
 
-## 阻止老的/dns-query被探测
+### * 阻止老的/dns-query被探测
 
 Cloudflare中可选择菜单 Security -> WAF -> Create Rule -> Create firewall rule
 
@@ -35,7 +35,7 @@ Cloudflare中可选择菜单 Security -> WAF -> Create Rule -> Create firewall r
 ![CDN中转DOH服务](dnsurlblock.JPG)
 
 
-## * 用新的URI替代/dns-query
+### * 用新的URI替代/dns-query
 
 Cloudflare中可选择菜单 Rules -> Transform Rules -> Create Rule
 
@@ -53,7 +53,7 @@ Cloudflare中可选择菜单 Rules -> Transform Rules -> Create Rule
 ![CDN中转DOH服务](dnsurlrewrite.JPG)
 
 
-## * 某些特定DOH服务需要用workers route
+## 某些特定DOH服务需要用workers route
 
 某些特定DOH服务如nextdns.io , 可能限制了hosts必须是nextdns.io, 在Cloudflare只能用workers来中转
 

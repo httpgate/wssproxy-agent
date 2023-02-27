@@ -47,7 +47,7 @@ node ./wssagent.js  [WSSURL]  [PROXY_PORT]  [-s]  [DOH_SERVER]  [WSSIP]  [CONNEC
 
 * 如果海外的pacproxy服务器被封了，这有可能是IP被封了，或者域名被封了。这时你可以自己在cloudflare之类的支持websocket的CDN上注册一个账户, 再[注册一个域名](https://github.com/httpgate/pacproxy.js/blob/main/documents/About_Domain_ZH.md)， 再在CDN上把这个域名指向你远端的pacproxy服务器，SSL/TLS mode设置为FULL, 然后把[WSSURL]中的域名改成你注册的域名, 就又可以连上了。enjoy and, 法轮大法好，真善忍好。
 
-* 如果pacurl直连被封锁，但[WSSURL]方式能连通，可以找一台墙内有公网IP的服务器运行wssagent，在[WSSURL]后加 /pac, [PROXY_PORT]设置为443，[SHARE_PROXY]设置为true, 海外的pacproxy的功能就转移到这个IP上, 但只支持需输入用户密码的pacurl。目前域名DNS还是指向海外服务器IP。需要设置本机的hosts记录， 或使用类似NextDNS.io这样的私有加密DNS服务，创建账号和私有DNS记录, 最好[用CDN中转DOH服务](CDN_PROXY_DOH.md)。不建议修改公共的DNS记录指向墙内服务器IP, 有数字证书被盗用的风险。
+* 如果pacurl直连被封锁，但[WSSURL]方式能连通，可以找一台墙内有公网IP的服务器运行wssagent，在[WSSURL]后加 /pac, [PROXY_PORT]设置为443，[SHARE_PROXY]设置为true, 海外的pacproxy的功能就转移到这个IP上, 但只支持需输入用户密码的pacurl。目前域名DNS还是指向海外服务器IP。需要设置本机的hosts记录， 或使用类似NextDNS.io这样的私有加密DNS服务， 最好[用CDN中转DOH服务](CDN_PROXY_DOH.md)。不建议修改公共的DNS记录指向墙内服务器IP, 有数字证书被盗用的风险。
 
 
 # 安全

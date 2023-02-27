@@ -86,11 +86,20 @@ function dohResolve(host) {
       name: host
     }]
   })
+
+  let vserver = dohServer;
+  let vpath = 'dns-query';
+  if(dohServer.toLocaleLowerCase().startsWith('https')){
+    let parsed = new URL(dohServer);
+    vserver = parsed.host;
+    vpath = parsed.pathname;
+    console.log(vpath);
+  }
   
   let options = {
-    hostname: dohServer,
+    hostname: vserver,
     port: 443,
-    path: '/dns-query',
+    path: vpath,
     method: 'POST',
     headers: {
       'Content-Type': 'application/dns-message',
@@ -134,7 +143,10 @@ function wssLookup(hostname, opts, cb) {
         if(wssips.length > 0) return;
         wssips = answers.map(answer => answer.data );
         wssips.forEach(ip => console.log('\r\nDOH Got Proxy Server IP (WSSIP): ' + ip));
-        dohurl = 'https://' + dohServer + '/dns-query';
+
+        if(dohServer.toLowerCase().startsWith('https')) dohurl = dohServer;
+        else dohurl = 'https://' + dohServer + '/dns-query';
+
         return cb(null, getRandom(wssips), 4);
     })
     .catch(err => {
@@ -278,7 +290,10 @@ function run(configs){
         let ips = answers.map(answer => answer.data );
         ips.forEach(ip => console.log('\r\nDOH Got Proxy Server IP (WSSIP): ' + ip));
         if(ips.length>1) console.log('\r\nWSSIP: ' + ips);
-        dohurl = 'https://' + dohServer + '/dns-query';
+
+        if(dohServer.toLowerCase().startsWith('https')) dohurl = dohServer;
+        else dohurl = 'https://' + dohServer + '/dns-query';
+
         console.log('\r\nDOH url (for Firefox): ' + dohurl);    })
     .catch(err => {
         console.log('\r\n' + err);

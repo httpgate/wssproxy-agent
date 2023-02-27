@@ -58,7 +58,7 @@ node ./wssagent.js  [WSSURL]  [PROXY_PORT]  [-s]  [DOH_SERVER]  [WSSIP]  [CONNEC
 
 * [WSSURL]后面加/pac 和 加/tls 一样， 通过CDN中转时传输内容对CDN是加密的。直连时也一样会验证数字证书避免IP劫持。
 
-* 由于常见的DOH服务器经常会被封锁，也可能哪天就突然封锁一段时间，而Firefox如果DOH失败则会自动切换为本机的DNS, 所以能用[WSSIP]和本机hosts记录就尽量不用DOH, 需要用DOH或私有DNS服务时，可以用CDN中转DOH服务，避免封锁。                                       
+* 由于常见的DOH服务经常会被封锁，所以能用[WSSIP]和本机hosts记录就尽量不用DOH, 需要用DOH或私有DNS服务时，可以用CDN中转DOH服务，避免DOH服务封锁。
 
 * 如果不信任pacproxy所运行的服务器， 则可以和无界，自由门混合使用。将无界，自由门的代理端口设置为wssagent的端口，浏览器则设置为无界/自由门的端口。这样pacproxy并不知道你具体访问了哪些网站，如原来连不上无界，自由门此时也可以连上。
 

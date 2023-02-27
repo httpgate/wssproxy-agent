@@ -36,6 +36,8 @@ node ./wssagent.js  [WSSURL]  [PROXY_PORT]  [-s]  [DOH_SERVER]  [WSSIP]  [CONNEC
 
 * [CONNECT_DOMAIN]仅在指定[WSSIP]时生效，[WSSIP]并不需要绑定域名记录。很多VPS可以动态增加IP地址，新加的IP地址重启pacproxy服务后就可以用作[WSSIP]
 
+* 如果同时指定了[WSSIP] 和 [DOH_SERVER]，连接时会用[WSSIP]连接服务器，但屏幕会显示[DOH_SERVER]解析域名的结果用于核对IP地址和DOH服务
+
 手机用户参照[Android系统wssagent说明](\/run-in-container\/README\.md)
 
 
@@ -52,7 +54,11 @@ node ./wssagent.js  [WSSURL]  [PROXY_PORT]  [-s]  [DOH_SERVER]  [WSSIP]  [CONNEC
 
 * 如果不信任中转流量的CDN, 则可以在CDN的[WSSURL]后面加 /tls , 此时穿越CDN的流量会加密，CDN不能探测你所访问的网站和内容，即使访问不加密的http网站对CDN也是不可知的。直连pacproxy服务器时一般不需要加/tls参数。
 
-* 如果直连pacproxy时指定了[WSSIP]和[CONNECT_DOMAIN], 会略过服务器数字证书验证。为避免IP劫持（虽然比较少见）, 可在直连的[WSSURL]后面加 /tls , 会在tls加密连接时验证服务器的数字证书，确保连接到了真的pacproxy服务器。
+* 如果直连pacproxy时指定了[WSSIP]和[CONNECT_DOMAIN], 会略过服务器数字证书验证。为避免IP劫持, 可在直连的[WSSURL]后面加 /tls , 会在tls加密连接时验证服务器的数字证书，确保连接到了真的pacproxy服务器。
+
+* [WSSURL]后面加/pac 和 加/tls 一样， 通过CDN中转时传输内容对CDN是加密的。直连时也一样会验证数字证书避免IP劫持。
+
+* 由于常见的DOH服务器经常会被封锁，也可能哪天就突然封锁一段时间，而Firefox如果DOH失败则会自动切换为本机的DNS, 所以能用[WSSIP]和本机hosts记录就尽量不用DOH, 需要用DOH或私有DNS服务时，可以用CDN中转DOH服务，避免封锁。                                       
 
 * 如果不信任pacproxy所运行的服务器， 则可以和无界，自由门混合使用。将无界，自由门的代理端口设置为wssagent的端口，浏览器则设置为无界/自由门的端口。这样pacproxy并不知道你具体访问了哪些网站，如原来连不上无界，自由门此时也可以连上。
 

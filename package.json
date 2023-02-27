@@ -1,6 +1,6 @@
 {
   "name": "wssagent",
-  "version": "1.1.1",
+  "version": "1.1.2",
   "description": "a local proxy server as an agent connecting to remote websocket proxy server",
   "main": "wssagent.js",
   "scripts": {

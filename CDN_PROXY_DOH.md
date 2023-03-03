@@ -28,7 +28,7 @@ Cloudflare中可选择菜单 Security -> WAF -> Create Rule -> Create firewall r
 
 点击 Deploy firewall rule 保存 
 
-保存后，用wssagent测试新的[DOH_SERVER]: https://xxx.example.com/dns-query,  如果获取[WSSIP]失败说明设置正确
+保存后，用wssagent测试老的[DOH_SERVER]: https://xxx.example.com/dns-query,  如果获取[WSSIP]失败说明设置正确
 
 如下图：
 

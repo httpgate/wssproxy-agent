@@ -23,11 +23,12 @@ A local proxy agent connecting to remote websocket proxy server. Abbreviated as 
 
 node ./wssagent.js  [WSSURL]  [PROXY_PORT]  [-s]  [DOH_SERVER]  [WSSIP]  [CONNECT_DOMAIN]
 
-./wssagent-linux  [WSSURL]  [PROXY_PORT]  [-s]  [DOH_SERVER]  [WSSIP]  [CONNECT_DOMAIN]
+nohup ./wssagent-linux  [WSSURL]  [PROXY_PORT]  [-s]  [DOH_SERVER]  [WSSIP]  [CONNECT_DOMAIN]
 
 或编辑wssagent同一目录下的 [wss.env文件](wss.env)，设置运行参数
 
 * Linux系统下的可执行文件只能在命令行下执行，除了[WSSURL]外其它参数不是必须输入
+
 * 默认只本机能用代理，加 -s 可分享本机IP和端口给同一网段，其他参数说明见 [wss.env文件](wss.env)
 
 * [WSSIP]是代理服务器的IP, 指定[WSSIP]将绕开DNS解析，避免域名劫持或DNS封锁
@@ -45,10 +46,11 @@ node ./wssagent.js  [WSSURL]  [PROXY_PORT]  [-s]  [DOH_SERVER]  [WSSIP]  [CONNEC
 
 * 很多软件不支持https加密的pacproxy代理， 用wssagent就可以在一台电脑上把pacproxy加密代理转换成普通代理，整个局域网都可以按普通方式代理上网
 
-* 如果海外的pacproxy服务器被封了，这有可能是IP被封了，或者域名被封了。这时你可以自己在cloudflare之类的支持websocket的CDN上注册一个账户, 再[注册一个域名](https://github.com/httpgate/pacproxy.js/blob/main/documents/About_Domain_ZH.md)， 再在CDN上把这个域名指向你远端的pacproxy服务器，SSL/TLS mode设置为FULL, 然后把[WSSURL]中的域名改成你注册的域名, 就又可以连上了。enjoy and, 法轮大法好，真善忍好。
+* 如果海外的pacproxy服务器被封了，这有可能是IP被封了，或者域名被封了。这时你可以自己在cloudflare之类的支持websocket的CDN上注册一个账户, 再[注册一个域名](https://github.com/httpgate/pacproxy.js/blob/main/documents/About_Domain_ZH.md)， 再在CDN上把这个域名指向你远端的pacproxy服务器，SSL/TLS mode设置为FULL, 然后把[WSSURL]中的域名改成你注册的域名, 就又可以连上了。
 
-* 如果pacurl直连被封锁，但[WSSURL]方式能连通，可以找一台墙内有公网IP的服务器运行wssagent，在[WSSURL]后加 /pac, [PROXY_PORT]设置为443，[SHARE_PROXY]设置为true, 海外的pacproxy的功能就转移到这个IP上, 但只支持需输入用户密码的pacurl。目前域名DNS还是指向海外服务器IP。需要设置本机的hosts记录， 或使用类似NextDNS.io这样的私有加密DNS服务， 最好[用CDN中转DOH服务](CDN_PROXY_DOH.md)。不建议修改公共的DNS记录指向墙内服务器IP, 有数字证书被盗用的风险。
+* CDN转发仅保留了pacproxy的websocket功能，丢失了加密proxy的功能。 在参数[WSSURL]后加 /pac, [PROXY_PORT]设置为443，[SHARE_PROXY]设置为true, 可以把加密proxy的功能转移到wssagent上。 但运行浏览器的系统需要用hosts文件记录修改域名指向到wssagent的IP，或者用nextdns修改dns指向。
 
+* 可参考[使用案例](https://github.com/httpgate/resources/blob/main/README.md)
 
 # 安全
 
@@ -56,7 +58,7 @@ node ./wssagent.js  [WSSURL]  [PROXY_PORT]  [-s]  [DOH_SERVER]  [WSSIP]  [CONNEC
 
 * 如果直连pacproxy时指定了[WSSIP]和[CONNECT_DOMAIN], 会略过服务器数字证书验证。为避免IP劫持, 可在直连的[WSSURL]后面加 /tls , 会在tls加密连接时验证服务器的数字证书，确保连接到了真的pacproxy服务器。
 
-* [WSSURL]后面加/pac 和 加/tls 一样， 通过CDN中转时传输内容对CDN是加密的。直连时也一样会验证数字证书避免IP劫持。
+* [WSSURL]后面加/pac 和 加/tls 一样， 通过CDN中转时传输内容对CDN是加密的。直连时也一样会验证数字证书避免域名或IP劫持。
 
 * 由于常见的DOH服务经常会被封锁，所以能用[WSSIP]和本机hosts记录就尽量不用DOH, 需要用DOH或私有DNS服务时，可以[用CDN中转DOH服务](CDN_PROXY_DOH.md)，避免DOH服务封锁。
 

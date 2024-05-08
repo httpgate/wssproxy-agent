@@ -1,7 +1,7 @@
 {
   "name": "wssagent",
-  "version": "1.1.3",
-  "description": "a local proxy server as an agent connecting to remote websocket proxy server",
+  "version": "1.1.4",
+  "description": "transform websocket encrypt proxy into normal local proxy, support CDN. 将远端的加密websocket代理转成本地普通代理，支持CDN中转",
   "main": "wssagent.js",
   "scripts": {
     "start": "node ./wssagent.js",
@@ -20,7 +20,12 @@
     "websocket",
     "wss",
     "cdn",
-    "vpn"
+    "vpn",
+    "加密",
+    "代理",
+    "CDN中转",
+    "安全",
+    "翻墙"
   ],
   "author": "xinjingjie.us@gmail.com",
   "license": "MIT",

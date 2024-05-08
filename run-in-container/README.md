@@ -10,6 +10,6 @@
 
 * Android要安装[firefox nightly build](https://play.google.com/store/apps/details?id=org.mozilla.fenix )（可[下载apk自己安装](https://www.apkmirror.com/apk/mozilla/firefox-fenix))， 
 
-* 在Firefox地址栏中输入about:config，在出现的搜索框中，键入proxy点搜索按钮。从下面列出的相关选项中，找到network.proxy.type更改为1，找到network.proxy.http和network.proxy.ssl，更改为localhost。 找到network.proxy.http_port和network.proxy.ssl_port, 更改为设置的端口.
+* 在Firefox地址栏中输入about:config，在出现的搜索框中，键入proxy点搜索按钮。从下面列出的相关选项中，找到network.proxy.type更改为1，找到network.proxy.http和network.proxy.ssl，更改为localhost。 找到network.proxy.http_port和network.proxy.ssl_port, 更改为设置的端口. network.proxy.allow_bypass 改为 false.
 
 * 将firefox的默认搜索引擎改为google. 中国大陆默认是baidu, 要改成google.

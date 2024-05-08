@@ -30,13 +30,8 @@ var wssips = [];
 var server = false;
 var tlsserver = false;
 var random = 0;
-var dohfailtime = 0;
 var wssDomain = '';
 var dohurl = '';
-
-function getRandomInt (min, max) {
-  return Math.floor(Math.random() * (max - min + 1)) + min
-}
 
 function getRandom(arr) {
   if(!arr) return false;
@@ -50,36 +45,30 @@ function getRandom(arr) {
 }
 
 function localhostLookup(hostname, opts, cb) {
-  cb(null, '127.0.0.1', 4);
+  if(opts && opts.all)  cb(null, [{"address":'127.0.0.1', "family":4}]);  
+  else    cb(null, '127.0.0.1', 4);  
 }
 
 function dohLookup(hostname, opts, cb) {
-  if(dohips) return cb(null, getRandom(dohips), 4);
-
-  dnsPromises.resolve4(hostname)
-  .then((ips)=>{
-    dohips = ips;
-    cb(null, getRandom(ips), 4);
-  })
-  .catch((error)=>{
-    console.log('boost dns error:' +error);
-    dnsPromises.lookup(hostname, {family: 4, all: true})
-    .then((ips)=>{
-      dohips = ips.map(ip => ip.address );
-      cb(null, getRandom(dohips), 4);
-    })
-    .catch((error)=>{
-      console.log('local dns error:' + error);
-      console.log('\r\nDOH Server %s DNS record not found', dohServer);
-      cb(error);
-    });
-  });
+  if(opts && opts.all)  cb(null, [{"address":getRandom(dohips), "family":4}]);  
+  else    cb(null, getRandom(dohips), 4);  
 }
 
-function dohResolve(host) {
-  let buf = dnsPacket.encode({
+function wssLookup(hostname, opts, cb) {
+  if(opts && opts.all)  cb(null, [{"address":getRandom(wssips), "family":4}]);  
+  else    cb(null, getRandom(wssips), 4);  
+}
+
+function toRFC8484 (buffer) {
+  return buffer.toString('base64')
+    .replace(/=/g, '')
+    .replace(/\+/g, '-')
+    .replace(/\//g, '_')
+}
+
+async function dohResolve(host) {
+  const packet = dnsPacket.encode({
     type: 'query',
-    id: getRandomInt(1, 65534),
     flags: dnsPacket.RECURSION_DESIRED,
     questions: [{
       type: 'A',
@@ -88,31 +77,39 @@ function dohResolve(host) {
   })
 
   let vserver = dohServer;
-  let vpath = 'dns-query';
+  let vpath = '/dns-query'; 
   if(dohServer.toLocaleLowerCase().startsWith('https')){
-    let parsed = new URL(dohServer);
+    const parsed = new URL(dohServer);
     vserver = parsed.host;
     vpath = parsed.pathname;
     console.log(vpath);
   }
-  
-  let options = {
+  const pth = vpath + '?dns=' + toRFC8484(packet);
+  const options = {
     hostname: vserver,
     port: 443,
-    path: vpath,
-    method: 'POST',
+    path: pth,
+    method: 'GET',
     headers: {
       'Content-Type': 'application/dns-message',
-      'Content-Length': Buffer.byteLength(buf)
     },
     timeout: 1000,
     lookup: dohLookup
   }
 
+  await dnsPromises.resolve4(vserver)
+  .then((ips)=>{
+    dohips = ips;
+  })
+  .catch((error)=>{
+    console.log('DOH: ' + error);
+  });
+
   return new Promise(function(resolve, reject) {
-    let request = https.request(options, (res) => {
+    if(!dohips.length)  reject('DOH: DOH Server DNS error');
+    let request = https.get(options, (res) => {
       if (res.statusCode < 200 || res.statusCode >= 300) {
-        return reject(new Error('statusCode=' + res.statusCode));
+        return reject(new Error('DOH statusCode=' + res.statusCode));
       }
 
       res.on('data', (d) => {
@@ -121,62 +118,22 @@ function dohResolve(host) {
         if(data.answers.length==0) reject('DOH: no dns record for domain: ' + host);
         resolve(data.answers.filter(answer => {return answer.type=='A'} ));
       });
+
     })
     
     request.on('error', (e) => {
       reject('DOH: ' + e);
     });
-
-    request.write(buf);
-    request.end();
-  });
-}
-
-function wssLookup(hostname, opts, cb) {
-  if(wssips && (wssips.length>0)) return cb(null, getRandom(wssips), 4);
-
-  if(!dohServer) dohfailtime=100;
-  else
-    dohResolve(hostname)
-    .then( answers => {
-        dohfailtime = 0;
-        if(wssips.length > 0) return;
-        wssips = answers.map(answer => answer.data );
-        wssips.forEach(ip => console.log('\r\nDOH Got Proxy Server IP (WSSIP): ' + ip));
-
-        if(dohServer.toLowerCase().startsWith('https')) dohurl = dohServer;
-        else dohurl = 'https://' + dohServer + '/dns-query';
-
-        return cb(null, getRandom(wssips), 4);
-    })
-    .catch(err => {
-        dohfailtime++;
-        console.log('\r\n' + err);
-    });
-
-  if(dohfailtime<2) return;
-  if(wssips && (wssips.length>0)) return;
-  console.log('\r\nWARNING! DOH DNS failed, use normal DNS, your proxy real domain might be exposed!');
-
-  dnsPromises.resolve4(hostname)
-  .then( ips =>{
-    if(wssips.length > 0) return;
-    wssips = ips;
-    ips.forEach(ip => console.log('\r\nDNS Got Proxy Server IP (WSSIP): ' + ip));
-    return cb(null, getRandom(ips), 4);
-  })
-  .catch( error =>{
-    console.log(error);
-    console.log('\r\nPlease specify WSSIP, or use a different WSSURL');
-    cb(error);
+    
   });
 }
 
 dnsPromises.setServers(['1.1.1.1', '8.8.8.8', '208.67.222.222', '8.8.4.4', '208.67.220.220']);
+
 const envpath = path.resolve(process.cwd(), 'wss.env');
 require('dotenv').config({path: envpath});
 
-function run(configs){
+async function run(configs){
   if(configs) {
     wssurl = configs.wssurl;
     if(!wssurl.toLowerCase().startsWith('wss://')) return console.log('invalid wssurl');
@@ -279,29 +236,34 @@ function run(configs){
     wssurl = url.toString();
   }
 
-  if(!wssip) wssLookup(wssDomain,{}, err => {
-    if(wssips.length==0) return console.log(err?err:'');
-    if(wssips.length>1) console.log('\r\nWSSIP: ' + wssips);
-    if(dohurl)  console.log('\r\nDOH url (for Firefox): ' + dohurl);
-  })
-  else if(dohServer) {
-    dohResolve(wssDomain)
+if(dohServer) {
+    await dohResolve(wssDomain)
     .then( answers => {
         let ips = answers.map(answer => answer.data );
         ips.forEach(ip => console.log('\r\nDOH Got Proxy Server IP (WSSIP): ' + ip));
-        if(ips.length>1) console.log('\r\nWSSIP: ' + ips);
-
+        if(ips.length && !wssips.length) wssips = ips;
         if(dohServer.toLowerCase().startsWith('https')) dohurl = dohServer;
         else dohurl = 'https://' + dohServer + '/dns-query';
-
         console.log('\r\nDOH url (for Firefox): ' + dohurl);    })
     .catch(err => {
         console.log('\r\n' + err);
     });
-
   }
 
-  start();
+  if(wssips.length) return start();
+
+  await dnsPromises.resolve4(wssDomain)
+  .then( ips =>{
+    wssips = ips;
+    ips.forEach(ip => console.log('\r\nDNS Got Proxy Server IP (WSSIP): ' + ip));
+  })
+  .catch( error =>{
+    console.log(error);
+    console.log('\r\nPlease specify WSSIP, or use a different WSSURL');
+    cb(error);
+  });
+
+  if(wssips.length) start();
 }
 
 function start() {
@@ -317,7 +279,7 @@ function start() {
   tlsserver = net.createServer(function(socket) {
 
     let connOptions = {lookup : localhostLookup, rejectUnauthorized: false};
-    if(wssip && connectDomain) connOptions = {lookup : localhostLookup};
+    if(connectDomain) connOptions = {lookup : localhostLookup};
 
     let upstream = tls.connect(server.address().port, wssDomain, connOptions);
     socket.on('end', () => upstream.destroy());
@@ -346,16 +308,15 @@ function connect() {
       if(wssip && connectDomain) connOptions = {lookup : wssLookup, agent: httpsagent, rejectUnauthorized: false} ;
 
       const ws = new WebSocket(wssurl, connOptions);
-      ws.on('close', () => c.destroy())
-      ws.on('error', () => c.destroy())
+      const duplex = WebSocket.createWebSocketStream(ws);
+
+      duplex.on('close', () => c.destroy())
+      duplex.on('error', () => c.destroy())
       c.on('end', () => ws.close(1000))
       c.on('error', () => ws.close(1000))
 
-      ws.on('open', () => c.on('data', data => ws.send(data)))
-      ws.on('message', data => {
-        if (!c.destroyed)
-          c.write(data)
-      })
+      duplex.pipe(c);
+      c.pipe(duplex);
   })
 
   server.on('error', (err) => {

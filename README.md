@@ -58,7 +58,7 @@ nohup ./wssagent-linux  [WSSURL]  [PROXY_PORT]  [-s]  [DOH_SERVER]  [WSSIP]  [CO
 
 * 如果直连pacproxy时指定了[CONNECT_DOMAIN], 会略过服务器数字证书验证。为避免域名或IP劫持, 可在直连的[WSSURL]后面加 /tls , 会在tls加密连接时验证服务器的数字证书，确保连接到了真的pacproxy服务器。
 
-* [WSSURL]后面加/pac 和 加/tls 一样，通过CDN中转时传输内容对CDN是加密的。如果使用编造域名直连也一样会验证数字证书避免域名或IP劫持。
+* [WSSURL]后面加/pac 和 加/tls 一样，通过CDN中转时传输内容对CDN是加密的。如果使用编造域名[CONNECT_DOMAIN]直连也一样会验证数字证书避免域名或IP劫持。
 
 * 由于常见的DOH服务经常会被封锁，所以能用[WSSIP]和本机hosts记录就尽量不用DOH, 需要用DOH或私有DNS服务时，可以[用CDN中转DOH服务](CDN_PROXY_DOH.md)，避免DOH服务封锁。
 

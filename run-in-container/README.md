@@ -8,6 +8,8 @@
 
 # 使用
 
+* 可设置在手机wifi的proxy里，域名填localhost, 端口填wssagent设置或显示的端口. 也可以仅在 Firefox设置代理，如下所示：
+
 * Android要安装[firefox nightly build](https://play.google.com/store/apps/details?id=org.mozilla.fenix )（可[下载apk自己安装](https://www.apkmirror.com/apk/mozilla/firefox-fenix))， 
 
 * 在Firefox地址栏中输入about:config，在出现的搜索框中，键入proxy点搜索按钮。从下面列出的相关选项中，找到network.proxy.type更改为1，找到network.proxy.http和network.proxy.ssl，更改为localhost。 找到network.proxy.http_port和network.proxy.ssl_port, 更改为设置的端口. network.proxy.allow_bypass 改为 false.

@@ -230,7 +230,7 @@ async function run(configs){
   console.log('\r\nConnect Domain: ' + connectDomain);
 
   let url = new URL(wssurl);
-  wssDomain = url.host;
+  wssDomain = url.host.split(":")[0];
   if(wssip && connectDomain){
     url.host = connectDomain;
     wssurl = url.toString();

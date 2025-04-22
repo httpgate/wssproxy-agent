@@ -102,5 +102,5 @@ if(process.argv[2]){
   }
 }
 
-const configs = {wssurl, proxyport, shareporxy, wssip, connectDomain, dohServer};
-require('src/wssagent.js').run(configs);
+const configs = {wssurl, proxyport, shareproxy, wssip, connectDomain, dohServer};
+require('./src/wssagent.js').run(configs);

@@ -23,4 +23,4 @@ var configs =
 
 }
 
-require('src/wssagent.js').run(configs);
+require('../src/wssagent.js').run(configs);

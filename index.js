@@ -4,6 +4,7 @@
 const readline = require('readline-sync');
 const path = require('path');
 const dotenv = require('dotenv');
+const ipv4 = require('@leichtgewicht/ip-codec').v4;
 
 //wss url like wss://site.domain/url
 var wssurl = '';

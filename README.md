@@ -39,18 +39,18 @@ nohup ./wssagent-linux  [WSSURL]  [PROXY_PORT]  [-s]  [DOH_SERVER]  [WSSIP]  [CO
 
 * 如果同时指定了[WSSIP] 和 [DOH_SERVER]，连接时会用[WSSIP]连接服务器，但屏幕会显示[DOH_SERVER]解析域名的结果用于核对IP地址和DOH服务
 
-手机用户参照[Android系统wssagent说明](\/run-in-container\/README\.md)
+手机用户参照[Android系统wssagent说明](\/example\/README\.md)
 
 
 # 用途
 
 * 很多软件不支持https加密的pacproxy代理， 用wssagent就可以在一台电脑上把pacproxy加密代理转换成普通代理，整个局域网都可以按普通方式代理上网
 
-* 利用CDN中转突破封锁或加强隐私。CDN中转后proxy服务器不知道访问者的真实IP,CDN服务器不知道访问目标。如果海外的pacproxy服务器被封了。可以自己在cloudflare之类的支持websocket的CDN上注册一个账户, 再[注册一个域名](https://github.com/httpgate/pacproxy.js/blob/main/documents/About_Domain_ZH.md)， 再在CDN上把这个域名指向你远端的pacproxy服务器，SSL/TLS mode设置为FULL, 然后把[WSSURL]中的域名改成你注册的域名, 就又可以连上了。
+* 利用CDN中转突破封锁或加强隐私。CDN中转后proxy服务器不知道访问者的真实IP,CDN服务器不知道访问目标。如果海外的pacproxy服务器被封了。可以自己在cloudflare之类的支持websocket的CDN上注册一个账户, 并注册一个CDN域名， 指向远端的pacproxy服务器ip，SSL/TLS mode设置为FULL, 然后把[WSSURL]中的域名改成你CDN域名, 就又可以连上了。
 
-* wssagent可以利用CDN转发，但会将加密proxy转成普通代理。如果希望在某些不安全的设备或网络上，通过Firefox设置加密PAC URL实现端到端加密，可在参数[WSSURL]后加 /pac, [PROXY_PORT]设置为443，[SHARE_PROXY]设置为true, 可以在Firefox上设置带用户密码的PAC URL。 但需要本机hosts文件记录修改域名指向到wssagent的IP，或者用[nextdns](https://my.nextdns.io/login)修改dns指向。不建议将真实DNS指向wssagent的IP, 有数字证书被盗用的风险。
+* wssagent可以利用CDN转发，但会将加密proxy转成普通非加密代理。如果希望在某些不安全的设备或网络上，通过Firefox设置加密PAC URL实现端到端加密，可在参数[WSSURL]后加/pac, 在Firefox上设置带用户密码的PAC URL。 但需要本机hosts文件记录修改域名指向到wssagent的IP，或者用[nextdns](https://my.nextdns.io/login)修改dns指向。不建议将真实DNS指向wssagent的IP, 有数字证书被盗用的风险。
 
-* 可参考[使用案例](https://github.com/httpgate/resources/blob/main/README.md)
+* 详情可参考[使用案例](https://github.com/httpgate/resources/blob/main/README.md)
 
 # 安全
 

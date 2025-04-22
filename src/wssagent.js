@@ -1,15 +1,11 @@
-#!/usr/bin/env node
 'use strict'
 
 const net = require('net');
 const tls = require('tls');
 const WebSocket = require('ws');
-const readline = require('readline-sync');
 const dnsPromises = require('dns').promises;
 const https = require('https');
 const dnsPacket = require('dns-packet')
-const ipv4 = require('@leichtgewicht/ip-codec').v4;
-const path = require('path');
 const httpsagent = https.Agent({keepAlive: true, timeout: 300000, maxCachedSessions: 1000 });
 
 //wss url like wss://site.domain/url
@@ -130,9 +126,6 @@ async function dohResolve(host) {
 
 dnsPromises.setServers(['1.1.1.1', '8.8.8.8', '208.67.222.222', '8.8.4.4', '208.67.220.220']);
 
-const envpath = path.resolve(process.cwd(), 'wss.env');
-require('dotenv').config({path: envpath});
-
 async function run(configs){
   if(configs) {
     wssurl = configs.wssurl;
@@ -142,84 +135,8 @@ async function run(configs){
     if(configs.wssip) wssip = configs.wssip;
     if(configs.dohServer) dohServer = configs.dohServer;
     if(configs.connectDomain) connectDomain = configs.connectDomain;
-  }
-  else if(process.argv[2]){
-    wssurl = process.argv[2];
-    if(!wssurl.toLowerCase().startsWith('wss://')) return console.log('invalid wssurl');
-    let i=3;
-    
-    if(process.argv[i] && (!isNaN(process.argv[i]))) {
-      proxyport = process.argv[i];
-      i++;
-    }
-    else if(process.env.PROXY_PORT) proxyport = process.env.PROXY_PORT;
-    
-    if(process.argv[i] && (process.argv[i].toLowerCase()=='-s')) {
-      shareproxy = true;
-      i++;
-    }
-    else if(process.env.SHARE_PROXY) shareproxy = true;
-    
-    if(process.argv[i] && !ipv4.isFormat(process.argv[i].trim().split(',')[0])) {
-      dohServer = process.argv[i].trim();
-      i++;
-    }
-    else if(process.env.DOH_SERVER) dohServer = process.env.DOH_SERVER;
-
-    if(process.argv[i] && ipv4.isFormat(process.argv[i].trim().split(',')[0])) {
-      wssip = process.argv[i].trim();
-      i++;
-    }  
-    else if(process.env.WSSIP) wssip = process.env.WSSIP;
-
-    if(process.argv[i]) connectDomain = process.argv[i];
-    else if(process.env.CONNECT_DOMAIN) connectDomain = process.env.CONNECT_DOMAIN;
-
-  } else if(process.env.WSSURL) {
-    wssurl = process.env.WSSURL;
-    if(!wssurl.toLowerCase().startsWith('wss://')) return console.log('invalid wssurl');
-
-    if(process.env.PROXY_PORT) proxyport = process.env.PROXY_PORT;
-    if(process.env.SHARE_PROXY) shareproxy = true;
-    if(process.env.WSSIP) wssip = process.env.WSSIP;
-    if(process.env.DOH_SERVER) dohServer = process.env.DOH_SERVER;  
-    if(process.env.CONNECT_DOMAIN) connectDomain = process.env.CONNECT_DOMAIN;
-  
-    console.log('\r\n Run as .env settings');
   } else {
-    wssurl = readline.question('\r\nInput websocket wss url: ');
-    if((!wssurl) || (!wssurl.toLowerCase().startsWith('wss://'))) return readline.question('\r\nivalid websocket wss url[ok]');
-
-    if(process.env.PROXY_PORT) proxyport = process.env.PROXY_PORT;
-    else{
-      let inport = readline.question('\r\nInput proxy port [Random]: ');
-      if(inport && (!isNaN(inport))) proxyport = inport;
-    }
-
-    if(process.env.SHARE_PROXY) shareproxy = true;
-    else {
-      let inshare = readline.question('\r\nShare proxy with others? [No]: ');
-      if(inshare && (inshare.toLowerCase().startsWith('y'))) shareproxy = true;
-    }
-
-    if(process.env.WSSIP) wssip = process.env.WSSIP;
-    else{
-      let inip = readline.question('\r\nInput proxy server ip address (WSSIP) [Skip]: ');
-      if(inip && ipv4.isFormat(inip.trim()))  wssip = inip.trim();
-      else if(inip) wssip = inip.trim();
-    }
-
-    if(process.env.DOH_SERVER) dohServer = process.env.DOH_SERVER;
-    else if(!wssip){
-      let indoh = readline.question('\r\nInput DOH (DNS over Https) server domain [Skip]: ');
-      if(indoh) dohServer = indoh.trim();
-    }
-
-    if(process.env.CONNECT_DOMAIN) connectDomain = process.env.CONNECT_DOMAIN;
-    else if(wssip){
-      let inconndomain = readline.question('\r\nIf directly connect to proxy server (not CDN), input a Connect Domain to avoid SNI-based HTTPS Filtering, \r\nand hide real domain [Skip]: ');
-      if(inconndomain) connectDomain = inconndomain;
-    }
+    return console.log('invalid arguments');
   }
 
   if(wssip) wssips = wssip.split(',');
@@ -231,7 +148,7 @@ async function run(configs){
 
   let url = new URL(wssurl);
   wssDomain = url.host.split(":")[0];
-  if(wssip && connectDomain){
+  if(connectDomain){
     url.host = connectDomain;
     wssurl = url.toString();
   }
@@ -303,9 +220,8 @@ function start() {
 
 function connect() {  
   server = net.createServer(c => {
-
       let connOptions = {lookup : wssLookup, agent: httpsagent};
-      if(wssip && connectDomain) connOptions = {lookup : wssLookup, agent: httpsagent, rejectUnauthorized: false} ;
+      if(connectDomain) connOptions = {lookup : wssLookup, agent: httpsagent, rejectUnauthorized: false} ;
 
       const ws = new WebSocket(wssurl, connOptions);
       const duplex = WebSocket.createWebSocketStream(ws);
@@ -333,7 +249,5 @@ function connect() {
     server.listen(proxyport, '127.0.0.1', cb);
   }
 }
-
-if(process.argv[1].includes(__filename)) run();
 
 exports.run = run ;

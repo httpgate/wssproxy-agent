@@ -1,14 +1,14 @@
 {
   "name": "wssagent",
-  "version": "1.1.6",
+  "version": "1.1.7",
   "description": "transform websocket encrypt proxy into normal local proxy, support CDN. 将远端的加密websocket代理转成本地普通代理，支持CDN中转",
   "main": "src/wssagent.js",
   "scripts": {
-    "start": "node ./index.js",
+    "start": "node ./runagent.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "bin": {
-    "wssagent": "./index.js"
+    "wssagent": "./runagent.js"
   },
   "repository": {
     "type": "git",

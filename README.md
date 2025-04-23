@@ -21,7 +21,7 @@ A local proxy agent connecting to remote websocket proxy server. Abbreviated as 
 
 可下载直接点击[绿色可执行文件](https://github.com/httpgate/resouces/tree/main/wssproxy-agent)，或在命令行执行，按以下顺序加上可选参数:
 
-node ./index.js  [WSSURL]  [PROXY_PORT]  [-s]  [DOH_SERVER]  [WSSIP]  [CONNECT_DOMAIN]
+node ./runagent.js  [WSSURL]  [PROXY_PORT]  [-s]  [DOH_SERVER]  [WSSIP]  [CONNECT_DOMAIN]
 
 nohup ./wssagent-linux  [WSSURL]  [PROXY_PORT]  [-s]  [DOH_SERVER]  [WSSIP]  [CONNECT_DOMAIN]
 
@@ -48,7 +48,7 @@ nohup ./wssagent-linux  [WSSURL]  [PROXY_PORT]  [-s]  [DOH_SERVER]  [WSSIP]  [CO
 
 * 利用CDN中转突破封锁或加强隐私。CDN中转后proxy服务器不知道访问者的真实IP,CDN服务器不知道访问目标。如果海外的pacproxy服务器被封了。可以自己在cloudflare之类的支持websocket的CDN上注册一个账户, 并注册一个CDN域名， 指向远端的pacproxy服务器ip，SSL/TLS mode设置为FULL, 然后把[WSSURL]中的域名替换成CDN域名, 就又可以连上了。
 
-* wssagent可以利用CDN转发，但会将加密proxy转成普通非加密代理。如果希望在某些不安全的设备或网络上，通过Firefox设置加密PAC URL实现端到端加密，可在参数[WSSURL]后加/pac, 在Firefox上设置带用户密码的PAC URL。 但需要本机hosts文件记录修改域名指向到wssagent的IP，或者用[nextdns](https://my.nextdns.io/login)修改dns指向。不建议将真实DNS指向wssagent的IP, 有数字证书被盗用的风险。
+* 在firefox中设置加密pacurl可实现端到端加密，安全性更高，但CDN不支持pacurl中转，在nginx/litespeed服务器部署时也不支持pacurl。可在参数[WSSURL]后加/pac, 在Firefox上设置带用户密码的pacurl。 但需要本机hosts文件记录修改域名指向到wssagent的IP，或者用[nextdns](https://my.nextdns.io/login)修改dns指向。不建议将真实DNS指向wssagent的IP, 有数字证书被盗用的风险。
 
 * 详情可参考[使用案例](https://github.com/httpgate/resources/blob/main/README.md)
 
@@ -60,7 +60,7 @@ nohup ./wssagent-linux  [WSSURL]  [PROXY_PORT]  [-s]  [DOH_SERVER]  [WSSIP]  [CO
 
 * [WSSURL]后面加/pac 和 加/tls 一样，通过CDN中转时传输内容对CDN是加密的。如果使用编造域名[CONNECT_DOMAIN]直连也一样会验证数字证书避免域名或IP劫持。
 
-* 由于常见的DOH服务经常会被封锁，所以能用[WSSIP]和本机hosts记录就尽量不用DOH, 需要用DOH或私有DNS服务时，可以[用CDN中转DOH服务](CDN_PROXY_DOH.md)，避免DOH服务封锁。
+* 常见的DOH服务可能会被封锁，可用[WSSIP]和本机hosts记录代替, 需要用DOH或私有DNS服务时，可以[用CDN中转DOH服务](CDN_PROXY_DOH.md)，避免DOH服务封锁。
 
 * 如果不信任pacproxy所运行的服务器， 则可以和无界，自由门混合使用。将无界，自由门的代理端口设置为wssagent的端口，浏览器则设置为无界/自由门的端口。这样pacproxy并不知道你具体访问的内容，如原来连不上无界，自由门此时也可以连上。可能也可以用此方法收看限定在无界/自由门上收看的新唐人晚会等节目。
 

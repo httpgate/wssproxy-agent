@@ -60,7 +60,7 @@ nohup ./wssagent-linux  [WSSURL]  [PROXY_PORT]  [-s]  [DOH_SERVER]  [WSSIP]  [CO
 
 * [WSSURL]后面加/pac 和 加/tls 一样，通过CDN中转时传输内容对CDN是加密的。如果使用编造域名[CONNECT_DOMAIN]直连也一样会验证数字证书避免域名或IP劫持。
 
-* 常见的DOH服务可能会被封锁，可用[WSSIP]和本机hosts记录代替, 需要用DOH或私有DNS服务时，可以[用CDN中转DOH服务](CDN_PROXY_DOH.md)，避免DOH服务封锁。
+* 常见的DOH服务可能会被封锁，可用[WSSIP]和本机hosts记录代替, 需要用DOH或私有DNS服务时，可以[用CDN中转DOH服务](https://github.com/httpgate/cdn-edge-script/blob/main/doc/CDN_PROXY_DOH.md)，避免DOH服务封锁。
 
 * 如果不信任pacproxy所运行的服务器， 则可以和无界，自由门混合使用。将无界，自由门的代理端口设置为wssagent的端口，浏览器则设置为无界/自由门的端口。这样pacproxy并不知道你具体访问的内容，如原来连不上无界，自由门此时也可以连上。可能也可以用此方法收看限定在无界/自由门上收看的新唐人晚会等节目。
 

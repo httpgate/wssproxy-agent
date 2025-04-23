@@ -48,7 +48,7 @@ nohup ./wssagent-linux  [WSSURL]  [PROXY_PORT]  [-s]  [DOH_SERVER]  [WSSIP]  [CO
 
 * 利用CDN中转突破封锁或加强隐私。CDN中转后proxy服务器不知道访问者的真实IP,CDN服务器不知道访问目标。如果海外的pacproxy服务器被封了。可以自己在cloudflare之类的支持websocket的CDN上注册一个账户, 并注册一个CDN域名， 指向远端的pacproxy服务器ip，SSL/TLS mode设置为FULL, 然后把[WSSURL]中的域名替换成CDN域名, 就又可以连上了。
 
-* 在firefox中设置加密pacurl可实现端到端加密，安全性更高，但CDN不支持pacurl中转，在nginx/litespeed服务器部署时也不支持pacurl。可在参数[WSSURL]后加/pac, 在Firefox上设置带用户密码的pacurl。 但需要本机hosts文件记录修改域名指向到wssagent的IP，或者用[nextdns](https://my.nextdns.io/login)修改dns指向。不建议将真实DNS指向wssagent的IP, 有数字证书被盗用的风险。
+* 在firefox中设置加密pacurl可实现端到端加密，安全性更高，但CDN不支持pacurl中转，pacproxy服务在nginx/litespeed部署时也不支持pacurl。可在参数[WSSURL]后加/pac来中转pacurl, 可在Firefox上设置带用户密码的pacurl。 但需要本机hosts文件记录修改域名指向到wssagent的IP，或者用[nextdns](https://my.nextdns.io/login)修改dns指向。不建议将真实DNS指向wssagent的IP, 有数字证书被盗用的风险。
 
 * 详情可参考[使用案例](https://github.com/httpgate/resources/blob/main/README.md)
 

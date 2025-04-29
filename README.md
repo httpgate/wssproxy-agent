@@ -18,7 +18,9 @@ A local proxy agent connecting to remote websocket proxy server. Abbreviated as 
 
 # 运行
 
-可下载直接点击[绿色可执行文件](https://github.com/httpgate/resouces/tree/main/wssproxy-agent)，或在命令行执行，按以下顺序加上可选参数:
+推荐用pm2[直接运行wssagent的npm库](https://github.com/httpgate/resouces/tree/main/pm2_Run_Npm_Package.md)
+
+也可下载直接点击[绿色可执行文件](https://github.com/httpgate/resouces/tree/main/wssproxy-agent)，或在命令行执行，按以下顺序加上可选参数:
 
 sudo ./wssagent-linux  [WSSURL]  [PROXY_PORT]  [-s]  [DOH_SERVER]  [WSSIP]  [CONNECT_DOMAIN]
 

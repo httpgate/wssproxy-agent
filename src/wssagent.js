@@ -5,9 +5,12 @@ const tls = require('tls');
 const WebSocket = require('ws');
 const dnsPromises = require('dns').promises;
 const https = require('https');
-const dnsPacket = require('dns-packet')
-const httpsagent = https.Agent({keepAlive: true, timeout: 300000, maxCachedSessions: 1000 });
+const dnsPacket = require('dns-packet');
+const AliveAgent = require('agentkeepalive').HttpsAgent;
+const ipAgents = [];
 
+//websocket connection agent
+var httpsagent = new AliveAgent();
 //wss url like wss://site.domain/url
 var wssurl = '';
 //wssagent listening port，also proxy port in firefox settings
@@ -135,6 +138,7 @@ async function run(configs){
     if(configs.wssip) wssip = configs.wssip;
     if(configs.dohServer) dohServer = configs.dohServer;
     if(configs.connectDomain) connectDomain = configs.connectDomain;
+    if(!wssip && !dohServer) dohServer = 'dns.cloudflare.com';
   } else {
     return console.log('invalid arguments');
   }
@@ -195,14 +199,16 @@ function start() {
 
   tlsserver = net.createServer(function(socket) {
 
-    let connOptions = {lookup : localhostLookup, rejectUnauthorized: false};
-    if(connectDomain) connOptions = {lookup : localhostLookup};
+    let connOptions = {lookup : localhostLookup, rejectUnauthorized: false, keepAlive: true};
+    if(connectDomain) connOptions = {lookup : localhostLookup, keepAlive: true};
 
+    if(vshare)  setAgent(socket.remoteAddress);
     let upstream = tls.connect(server.address().port, wssDomain, connOptions);
     socket.on('end', () => upstream.destroy());
     socket.on('error', () => upstream.destroy());
     upstream.on('end', () => socket.destroy());
     upstream.on('error', () => socket.destroy());
+    socket.setNoDelay(true);
     socket.pipe(upstream).pipe(socket);
   });
 
@@ -220,6 +226,8 @@ function start() {
 
 function connect() {  
   server = net.createServer(c => {
+      if(shareproxy)  setAgent(c.remoteAddress);
+
       let connOptions = {lookup : wssLookup, agent: httpsagent};
       if(connectDomain) connOptions = {lookup : wssLookup, agent: httpsagent, rejectUnauthorized: false} ;
 
@@ -248,6 +256,17 @@ function connect() {
   } else {
     server.listen(proxyport, '127.0.0.1', cb);
   }
+}
+
+function setAgent(remoteIp){
+  if(!remoteIp) return;
+  let ipAgent = ipAgents.find(item => item.ip==remoteIp);
+  
+  if(ipAgent) httpsagent = ipAgent.agent;
+  else ipAgents.push({ip: remoteIp, agent: new AliveAgent() });
+
+  if(ipAgents.length>256) ipAgents.shift();
+
 }
 
 exports.run = run ;

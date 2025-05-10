@@ -96,10 +96,6 @@ if(process.argv[2]){
   }
 
   if(process.env.CONNECT_DOMAIN) connectDomain = process.env.CONNECT_DOMAIN;
-  else if(wssip){
-    let inconndomain = readline.question('\r\nIf directly connect to proxy server (not CDN), input a Connect Domain to avoid SNI-based HTTPS Filtering, \r\nand hide real domain [Skip]: ');
-    if(inconndomain) connectDomain = inconndomain;
-  }
 }
 
 const configs = {wssurl, proxyport, shareproxy, wssip, connectDomain, dohServer};

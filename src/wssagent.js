@@ -39,7 +39,7 @@ function getRandom(arr) {
   if(arr.length==1) return arr[0];
   random++;
   if(random>=513) random=0;
-  let choice = random % arr.length ;
+  const choice = random % arr.length ;
   return arr[choice];
 }
 
@@ -203,7 +203,7 @@ function start() {
     if(connectDomain) connOptions = {lookup : localhostLookup, keepAlive: true};
 
     if(vshare)  setAgent(socket.remoteAddress);
-    let upstream = tls.connect(server.address().port, wssDomain, connOptions);
+    const upstream = tls.connect(server.address().port, wssDomain, connOptions);
     socket.on('end', () => upstream.destroy());
     socket.on('error', () => upstream.destroy());
     upstream.on('end', () => socket.destroy());
@@ -234,10 +234,10 @@ function connect() {
       const ws = new WebSocket(wssurl, connOptions);
       const duplex = WebSocket.createWebSocketStream(ws);
 
-      duplex.on('close', () => c.destroy())
-      duplex.on('error', () => c.destroy())
-      c.on('end', () => ws.close(1000))
-      c.on('error', () => ws.close(1000))
+      duplex.on('close', () => c.destroy());
+      duplex.on('error', () => c.destroy());
+      c.on('end', () => {duplex.destroy(); ws.close(1000);});
+      c.on('error', () => {duplex.destroy(); ws.close(1000);});
 
       duplex.pipe(c);
       c.pipe(duplex);
@@ -262,11 +262,15 @@ function setAgent(remoteIp){
   if(!remoteIp) return;
   let ipAgent = ipAgents.find(item => item.ip==remoteIp);
   
-  if(ipAgent) httpsagent = ipAgent.agent;
-  else ipAgents.push({ip: remoteIp, agent: new AliveAgent() });
+  if(!ipAgent){
+    ipAgent = {ip: remoteIp, agent: new AliveAgent() };
+    ipAgents.push(ipAgent);
+    if(ipAgents.length>256) ipAgents.shift();
+  }
 
-  if(ipAgents.length>256) ipAgents.shift();
-
+  httpsagent = ipAgent.agent;
 }
+
+process.on('uncaughtException', (error)=>console.log(error))
 
 exports.run = run ;

@@ -49,7 +49,7 @@ sudo ./runagent.js [WSSURL]  [PROXY_PORT]  [-s]  [DOH_SERVER]  [WSSIP]  [CONNECT
 
 # 后台运行
 
-* 建议用后台pm2运行
+* 建议用pm2后台运行
 
 ```
 sudo npm install -g pm2

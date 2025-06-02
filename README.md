@@ -40,7 +40,7 @@ sudo ./runagent.js [WSSURL]  [PROXY_PORT]  [-s]  [DOH_SERVER]  [WSSIP]  [CONNECT
 
 * [WSSIP]是代理服务器的IP, 指定[WSSIP]将绕开DNS解析，避免域名劫持或DNS封锁
 
-* 如[WSSURL]是直连pacproxy，可设置一个编造的域名[CONNECT_DOMAIN]，连接代理服务器时会自动替换[WSSURL]里的域名，以避开域名审查，隐藏真实域名。如果是CDN中转则不能用[CONNECT_DOMAIN]。编造域名需避开常见已知域名，尤其是已经被封锁的域名
+* 如[WSSURL]是直连pacproxy，可设置一个编造的域名[CONNECT_DOMAIN]，连接代理服务器时会自动替换[WSSURL]里的域名，以避开域名审查，隐藏真实域名。如果是CDN中转则不能用[CONNECT_DOMAIN]。编造域名需避开常见已知域名，尤其是已经被封锁的域名.可用[CONNECT_DOMAIN]功能避开对一些免费或低价域名段的封锁。
 
 * [WSSIP]并不需要绑定域名记录。很多VPS可以动态增加IP地址，新加的IP地址重启pacproxy服务后就可以用作[WSSIP]
 
